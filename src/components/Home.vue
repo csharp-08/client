@@ -12,6 +12,8 @@
 </template>
 
 <script>
+import { HubConnectionBuilder } from "@aspnet/signalr";
+
 export default {
   name: 'Home',
   data() {
@@ -22,6 +24,17 @@ export default {
   methods: {
     submit() {
       console.log(`Your name is ${this.surname}`);
+
+      let connection = new HubConnectionBuilder()
+          .withUrl("/chat")
+          .build();
+      
+      connection.on("send", data => {
+          console.log(data);
+      });
+      
+      connection.start()
+          .then(() => connection.invoke("send", "Hello"));
     },
   },
 };
@@ -65,5 +78,6 @@ button {
   background-color: #217e9e;
   color: #fff;
   cursor: pointer;
+  border-radius: 5px;
 }
 </style>
