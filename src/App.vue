@@ -1,11 +1,17 @@
 <template>
   <div id="app">
-    Welcome to the collaboratif dashboard !
+    <Home></Home>
   </div>
 </template>
 
-<script>export default {
+<script>
+import Home from './components/Home.vue';
+
+export default {
   name: 'app',
+  components: {
+    Home,
+  },
 };
 </script>
 
@@ -14,5 +20,10 @@
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+body {
+  margin: 0;
+  padding: 0;
+  color: rgb(76, 76, 76);
 }
 </style>
