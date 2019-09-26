@@ -5,36 +5,38 @@
     </h1>
     <form @submit.prevent="submit">
       <label for="name">Entrez votre surnom:</label>
-      <input id="name" v-model="surname" placeholder="Surnom..."/>
+      <input id="name"
+             autocomplete="off"
+             v-model="username"
+             :class="{ invalid: invalidInput }"
+             placeholder="Surnom..."
+             @focus="invalidInput = false"
+      />
       <button>Commencer</button>
     </form>
   </div>
 </template>
 
 <script>
-import { HubConnectionBuilder } from "@aspnet/signalr";
-
 export default {
   name: 'Home',
   data() {
     return {
-      surname: '',
+      username: '',
+      invalidInput: false,
     };
   },
   methods: {
     submit() {
-      console.log(`Your name is ${this.surname}`);
-
-      let connection = new HubConnectionBuilder()
-          .withUrl("/chat")
-          .build();
-      
-      connection.on("send", data => {
-          console.log(data);
-      });
-      
-      connection.start()
-          .then(() => connection.invoke("send", "Hello"));
+      if (!/\w/gmi.test(this.username)) {
+        this.invalidInput = false;
+        setTimeout(() => {
+          this.invalidInput = true;
+        }, 50);
+        return;
+      }
+      console.log(`Your name is ${this.username}`);
+      this.$emit('start', this.username);
     },
   },
 };
@@ -62,9 +64,9 @@ export default {
 }
 
 input {
-  padding: 0.2rem 0.4rem;
+  padding: 0.6rem 1.2rem;
   border: 1px solid #afafaf;
-  border-radius: 5px;
+  border-radius: 2rem;
   outline: none;
   color: rgb(76, 76, 76);
 }
@@ -73,11 +75,42 @@ input:focus {
   border: 1px solid #7c7c7c;
 }
 
+input.invalid {
+  border: 1px solid #7c2328;
+  transform: translate3d(0, 0, 0);
+  animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both;
+  perspective: 1000px;
+}
+
 button {
   outline: none;
-  background-color: #217e9e;
+  background-color: #2298b9;
   color: #fff;
   cursor: pointer;
-  border-radius: 5px;
+  border-radius: 2rem;
+  border: none;
+  padding: 0.6rem 1.2rem;
+}
+
+button:hover, button:focus {
+  background-color: #217e9e;
+}
+
+@keyframes shake {
+  10%, 90% {
+    transform: translate3d(-1px, 0, 0);
+  }
+
+  20%, 80% {
+    transform: translate3d(2px, 0, 0);
+  }
+
+  30%, 50%, 70% {
+    transform: translate3d(-4px, 0, 0);
+  }
+
+  40%, 60% {
+    transform: translate3d(4px, 0, 0);
+  }
 }
 </style>
