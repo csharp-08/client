@@ -15,15 +15,17 @@ class FreeLineTool extends Tool {
     if (!event || !event.evt) {
       return null;
     }
+    const strokeWidth = params.strokeWidth || this.defaultParams.strokeWidth;
     return {
       component: this.shapeName,
       toolName: 'circle',
       config: {
         x: event.evt.offsetX,
         y: event.evt.offsetY,
-        radius: 1,
+        radius: strokeWidth / 2,
+        minRadius: strokeWidth / 2,
         stroke: params.color || this.defaultParams.color,
-        strokeWidth: params.strokeWidth || this.defaultParams.strokeWidth,
+        strokeWidth,
         lineCap: 'round',
         lineJoin: 'round',
       },
@@ -37,8 +39,8 @@ class FreeLineTool extends Tool {
     }
     const dx = (event.evt.offsetX - newShape.config.x);
     const dy = (event.evt.offsetY - newShape.config.y);
-    
-    newShape.config.radius = Math.sqrt(dx * dx + dy * dy);
+
+    newShape.config.radius = Math.max(Math.sqrt(dx * dx + dy * dy), newShape.config.minRadius);
   }
 
   // eslint-disable-next-line
