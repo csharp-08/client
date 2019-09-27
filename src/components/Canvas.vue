@@ -1,7 +1,11 @@
 <template>
   <div class="container" ref='container'>
     <tool-box @select-tool="setTool($event)"
-              @update-params="Object.assign(toolParams, $event)" ></tool-box>
+              @update-params="Object.assign(toolParams, $event)"
+              :tool="tool"
+              :params="toolParams"
+              ref="toolbox"
+    ></tool-box>
     <v-stage :config="configKonva"
              @mousedown="startDrawing($event)"
              @mousemove="draw($event)"
@@ -36,7 +40,7 @@ export default {
   },
   mounted() {
     this.configKonva.width = this.$refs.container.clientWidth;
-    this.configKonva.height = this.$refs.container.clientHeight - 50;
+    this.configKonva.height = this.$refs.container.clientHeight - 51;
   },
   data() {
     return {
@@ -56,6 +60,9 @@ export default {
   },
   methods: {
     startDrawing(event) {
+      if (this.$refs.toolbox) {
+        this.$refs.toolbox.closeTools();
+      }
       if (Object.keys(this.tools).includes(this.tool)) {
         const newShape = this.tools[this.tool].startDrawing(event, this.toolParams);
         if (newShape !== null) {
