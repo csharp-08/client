@@ -9,7 +9,7 @@
       <v-layer>
         <template v-for="(shape, index) in shapes">
           <component :is="shape.component"
-                     :config="shape.config"
+                     :config="{ ...shape.config, draggable: tool === 'select'}"
                      :key="`${index}_${tools[shape.toolName].getKey(shape)}`"></component>
         </template>
       </v-layer>
@@ -21,6 +21,7 @@
 import ToolBox from './ToolBox.vue';
 
 import FreeLineTool from './tools/freeLineTool';
+import CircleTool from './tools/circle';
 
 export default {
   name: 'Canvas',
@@ -49,6 +50,7 @@ export default {
       tool: 'select',
       tools: {
         freeLine: new FreeLineTool(),
+        circle: new CircleTool(),
       },
     };
   },
@@ -80,7 +82,7 @@ export default {
     },
     setTool({ tool, params }) {
       this.tool = tool;
-      this.toolParams = params;
+      this.toolParams = Object.assign(this.toolParams, params);
     },
   },
 };

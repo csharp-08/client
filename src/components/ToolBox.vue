@@ -2,6 +2,7 @@
     <div>
         <button @click="setTool('select')">Select</button>
         <button @click="setTool('freeLine')">FreeLine</button>
+        <button @click="setTool('circle')">Cercle</button>
         <button @click="updateParam({ color: 'red' })">Rouge</button>
         <button @click="updateParam({ color: 'blue' })">Bleu</button>
         <button @click="updateParam({ color: 'green' })">Vert</button>

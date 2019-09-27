@@ -4,7 +4,7 @@ class FreeLineTool extends Tool {
   constructor() {
     super();
 
-    this.shapeName = 'v-line';
+    this.shapeName = 'v-circle';
     this.defaultParams = {
       color: 'black',
       strokeWidth: 10,
@@ -17,9 +17,11 @@ class FreeLineTool extends Tool {
     }
     return {
       component: this.shapeName,
-      toolName: 'freeLine',
+      toolName: 'circle',
       config: {
-        points: [event.evt.offsetX, event.evt.offsetY, event.evt.offsetX, event.evt.offsetY],
+        x: event.evt.offsetX,
+        y: event.evt.offsetY,
+        radius: 1,
         stroke: params.color || this.defaultParams.color,
         strokeWidth: params.strokeWidth || this.defaultParams.strokeWidth,
         lineCap: 'round',
@@ -33,7 +35,10 @@ class FreeLineTool extends Tool {
     if (!event || !event.evt) {
       return;
     }
-    newShape.config.points.push(event.evt.offsetX, event.evt.offsetY);
+    const dx = (event.evt.offsetX - newShape.config.x);
+    const dy = (event.evt.offsetY - newShape.config.y);
+    
+    newShape.config.radius = Math.sqrt(dx * dx + dy * dy);
   }
 
   // eslint-disable-next-line
@@ -41,7 +46,7 @@ class FreeLineTool extends Tool {
 
   // eslint-disable-next-line
   getKey(shape) {
-    return shape.config.points.length;
+    return shape.config.radius;
   }
 }
 
