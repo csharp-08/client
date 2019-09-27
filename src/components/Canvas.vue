@@ -3,13 +3,15 @@
     <tool-box @select-tool="setTool($event)"
               @update-params="Object.assign(toolParams, $event)" ></tool-box>
     <v-stage :config="configKonva"
-             @mousedown="newLine($event)"
-             @mousemove="addPoints($event)"
-             @mouseup="isDrawing = false">
+             @mousedown="startDrawing($event)"
+             @mousemove="draw($event)"
+             @mouseup="stopDrawing($event)">
       <v-layer>
-        <li v-for="(item, index) in lineList" :key="`${index}_${item.points.length}`">
-          <v-line :config="item" @mousedown="move"></v-line>
-        </li>
+        <template v-for="(shape, index) in shapes">
+          <component :is="shape.component"
+                     :config="shape.config"
+                     :key="`${index}_${tools[shape.toolName].getKey(shape)}`"></component>
+        </template>
       </v-layer>
     </v-stage>
   </div>
@@ -17,6 +19,8 @@
 
 <script>
 import ToolBox from './ToolBox.vue';
+
+import FreeLineTool from './tools/freeLineTool';
 
 export default {
   name: 'Canvas',
@@ -39,38 +43,42 @@ export default {
         width: 0,
         height: 0,
       },
-      lineList: [],
+      shapes: [],
       isDrawing: false,
       toolParams: {},
-      tool: 'select'
+      tool: 'select',
+      tools: {
+        freeLine: new FreeLineTool(),
+      },
     };
   },
   methods: {
-    newLine(event) {
-      if (this.tool === 'line') {
-        this.lineList.push({
-          points: [event.evt.offsetX, event.evt.offsetY, event.evt.offsetX, event.evt.offsetY],
-          stroke: this.toolParams.color || 'red',
-          strokeWidth: this.toolParams.strokeWidth || 10,
-          lineCap: 'round',
-          lineJoin: 'round',
-        });
-        console.log('is drawing');
-        this.isDrawing = true;
+    startDrawing(event) {
+      if (Object.keys(this.tools).includes(this.tool)) {
+        const newShape = this.tools[this.tool].startDrawing(event, this.toolParams);
+        if (newShape !== null) {
+          this.shapes.push(newShape);
+          this.isDrawing = true;
+        }
       }
     },
-    addPoints(event) {
+    draw(event) {
       if (this.isDrawing) {
-        const lastIndex = this.lineList.length - 1;
-        this.lineList[lastIndex].points.push(event.evt.offsetX, event.evt.offsetY);
+        const newShape = this.shapes[this.shapes.length - 1] || null;
+        if (newShape === null) {
+          return;
+        }
+        this.tools[this.tool].draw(event, newShape);
       }
     },
-
-    move() {
-      console.log('okok');
+    stopDrawing(event) {
+      if (this.isDrawing) {
+        const newShape = this.shapes[this.shapes.length - 1] || null;
+        this.tools[this.tool].stopDrawing(event, newShape);
+        this.isDrawing = false;
+      }
     },
-
-    setTool({tool, params}) {
+    setTool({ tool, params }) {
       this.tool = tool;
       this.toolParams = params;
     },
