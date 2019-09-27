@@ -1,14 +1,7 @@
 <template>
   <div class="container" ref='container'>
-    <div>
-      <div>Canvas. Bonjour {{username}} !</div>
-      <button @click="color = 'red'">Rouge</button>
-      <button @click="color = 'blue'">Bleu</button>
-      <button @click="color = 'green'">Vert</button>
-      <button @click="color = 'white'">Effacer</button>
-      <input @change="updateStroke($event)" type="range"
-          min="3" max="100" value="15" class="slider" id="myRange">
-    </div>
+    <tool-box @select-tool="setTool($event)"
+              @update-params="Object.assign(toolParams, $event)" ></tool-box>
     <v-stage :config="configKonva"
              @mousedown="newLine($event)"
              @mousemove="addPoints($event)"
@@ -23,8 +16,13 @@
 </template>
 
 <script>
+import ToolBox from './ToolBox.vue';
+
 export default {
   name: 'Canvas',
+  components: {
+    ToolBox,
+  },
   props: {
     username: {
       type: String,
@@ -43,21 +41,23 @@ export default {
       },
       lineList: [],
       isDrawing: false,
-      color: 'blue',
-      strokeWidth: 15,
+      toolParams: {},
+      tool: 'select'
     };
   },
   methods: {
     newLine(event) {
-      this.lineList.push({
-        points: [event.evt.offsetX, event.evt.offsetY, event.evt.offsetX, event.evt.offsetY],
-        stroke: this.color,
-        strokeWidth: this.strokeWidth,
-        lineCap: 'round',
-        lineJoin: 'round',
-      });
-      console.log('is drawing');
-      this.isDrawing = true;
+      if (this.tool === 'line') {
+        this.lineList.push({
+          points: [event.evt.offsetX, event.evt.offsetY, event.evt.offsetX, event.evt.offsetY],
+          stroke: this.toolParams.color || 'red',
+          strokeWidth: this.toolParams.strokeWidth || 10,
+          lineCap: 'round',
+          lineJoin: 'round',
+        });
+        console.log('is drawing');
+        this.isDrawing = true;
+      }
     },
     addPoints(event) {
       if (this.isDrawing) {
@@ -70,9 +70,9 @@ export default {
       console.log('okok');
     },
 
-    updateStroke(event) {
-      console.log(event.srcElement.value);
-      this.strokeWidth = event.srcElement.value;
+    setTool({tool, params}) {
+      this.tool = tool;
+      this.toolParams = params;
     },
   },
 };
