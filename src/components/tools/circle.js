@@ -26,6 +26,7 @@ class FreeLineTool extends Tool {
         minRadius: strokeWidth / 2,
         stroke: params.color || this.defaultParams.color,
         strokeWidth,
+        fillEnabled: false,
         lineCap: 'round',
         lineJoin: 'round',
       },
