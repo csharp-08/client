@@ -26,6 +26,7 @@ import ToolBox from './ToolBox.vue';
 
 import FreeLineTool from './tools/freeLineTool';
 import CircleTool from './tools/circle';
+import TextTool from './tools/text';
 
 export default {
   name: 'Canvas',
@@ -55,6 +56,7 @@ export default {
       tools: {
         freeLine: new FreeLineTool(),
         circle: new CircleTool(),
+        text: new TextTool(),
       },
     };
   },

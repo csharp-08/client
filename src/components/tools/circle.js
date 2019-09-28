@@ -1,6 +1,6 @@
 import Tool from './tool';
 
-class FreeLineTool extends Tool {
+class Cirle extends Tool {
   constructor() {
     super();
 
@@ -53,4 +53,4 @@ class FreeLineTool extends Tool {
   }
 }
 
-export default FreeLineTool;
+export default Cirle;
