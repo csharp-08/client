@@ -27,7 +27,7 @@ export default {
     async start(username) {
       this.username = username;
       try {
-        const connection = new HubConnectionBuilder().withUrl('https://localhost:5001/ws-client').build();
+        const connection = new HubConnectionBuilder().withUrl('https://localhost:5001/ws-server').build();
         await connection.start();
         console.log('Connected !');
       } catch (e) {
