@@ -9,14 +9,18 @@
     <button @click="setTool('circle')" :class="{ active: tool === 'circle' }">
       <font-awesome-icon icon="circle" />
     </button>
-    <button @click="setTool('text')" :class="{ active: tool === 'text' }">
-      <font-awesome-icon icon="text-width" />
-      <input id="text"
-              autocomplete="off"
-              v-model="text"
-              placeholder="Ton texte ici"
-              @change="updateParam({ text: text })"
-              />
+    <button class="colors-container"
+            @click.stop="setTool('text'); showText = !showText;"
+            :class="{ active: tool === 'text' }">
+      <font-awesome-icon icon="font" />
+      <div class="stroke-width" v-if="showText" @click.stop>
+        <input id="text"
+                autocomplete="off"
+                v-model="text"
+                placeholder="Ton texte ici"
+                @input="updateParam({ text })"
+                />
+      </div>
     </button>
     <div class="divider"></div>
     <button :style="{ color }" @click.stop="showColors = !showColors" class="colors-container">
@@ -62,6 +66,7 @@ export default {
       color: 'rgb(76, 76, 76)',
       showColors: false,
       showStroke: false,
+      showText: false,
       colors: [
         'black', 'red', 'blue', 'green', 'yellow', 'white',
       ],
@@ -82,6 +87,7 @@ export default {
     closeTools() {
       this.showColors = false;
       this.showStroke = false;
+      this.showText = false;
     },
   },
 };
@@ -156,5 +162,8 @@ export default {
   }
   .stroke-width > input {
     width: 100%;
+  }
+  #text {
+    margin: 0.2rem 0.3rem;
   }
 </style>

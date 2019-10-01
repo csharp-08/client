@@ -13,6 +13,7 @@
       <v-layer>
         <template v-for="(shape, index) in shapes">
           <component :is="shape.component"
+                     @dragend="handleDragEnd($event, index)"
                      :config="{ ...shape.config, draggable: tool === 'select'}"
                      :key="`${index}_${tools[shape.toolName].getKey(shape)}`"></component>
         </template>
@@ -92,6 +93,10 @@ export default {
     setTool({ tool, params }) {
       this.tool = tool;
       this.toolParams = Object.assign(this.toolParams, params);
+    },
+    handleDragEnd(event, index) {
+      console.log(`Forme n'${index} :`);
+      console.log(event.target.attrs);
     },
   },
 };

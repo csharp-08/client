@@ -24,15 +24,12 @@ export default {
     };
   },
   methods: {
-    start(username) {
+    async start(username) {
       this.username = username;
       try {
-        const connection = new HubConnectionBuilder().withUrl('/chat').build();
-        connection.on('send', (data) => {
-          console.log(data);
-        });
-        connection.start()
-          .then(() => connection.invoke('send', 'Hello'));
+        const connection = new HubConnectionBuilder().withUrl('https://localhost:5001/ws-client').build();
+        await connection.start();
+        console.log('Connected !');
       } catch (e) {
         console.log(e);
       }

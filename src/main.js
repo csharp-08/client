@@ -2,7 +2,7 @@ import Vue from 'vue';
 import VueKonva from 'vue-konva';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import {
-  faMousePointer, faPen, faCircle, faPalette, faSquare,
+  faMousePointer, faPen, faCircle, faPalette, faSquare, faFont,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import App from './App.vue';
@@ -16,6 +16,7 @@ library.add(faPen);
 library.add(faCircle);
 library.add(faPalette);
 library.add(faSquare);
+library.add(faFont);
 Vue.component('font-awesome-icon', FontAwesomeIcon);
 
 new Vue({
