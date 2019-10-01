@@ -33,6 +33,11 @@ class Text extends Tool {
 
   // eslint-disable-next-line
   draw(event, newShape) {
+    if (!event || !event.evt) {
+      return;
+    }
+    newShape.config.x = event.evt.offsetX;
+    newShape.config.y = event.evt.offsetY;
   }
 
   // eslint-disable-next-line
