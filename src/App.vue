@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <Canvas v-if="connected" :username="username" @exit="exit"></Canvas>
+    <Canvas v-if="connected" :id="id" :users="users" @exit="exit"></Canvas>
     <Home @start="start($event)" v-else ></Home>
   </div>
 </template>
@@ -30,6 +30,8 @@ export default {
     return {
       connected: false,
       username: '',
+      users: {},
+      id: '',
     };
   },
   methods: {
@@ -51,8 +53,11 @@ export default {
       this.connected = false;
     },
     setUpServerAPIs(connection) {
-      connection.on('drawers', (data) => {
-        console.log(data);
+      connection.on('drawers', (users) => {
+        this.users = JSON.parse(users);
+      });
+      connection.on('ID', (id) => {
+        this.id = id;
       });
     },
   },

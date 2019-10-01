@@ -4,6 +4,8 @@
               @update-params="Object.assign(toolParams, $event)"
               :tool="tool"
               :params="toolParams"
+              :id="id"
+              :users="users"
               ref="toolbox"
     ></tool-box>
     <v-stage :config="configKonva"
@@ -35,9 +37,13 @@ export default {
     ToolBox,
   },
   props: {
-    username: {
+    id: {
       type: String,
       default: '',
+    },
+    users: {
+      type: Object,
+      default: () => ({}),
     },
   },
   mounted() {

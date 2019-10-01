@@ -44,6 +44,11 @@
                min="3" max="100" value="15" class="slider" id="myRange">
       </div>
     </button>
+
+    <div class="toRight" :key="Object.keys(users).length">
+      <div class="username">{{(users[id] || {}).Username}}</div>
+      <div>({{Object.keys(users).length}} personne(s) dans le salon)</div>
+    </div>
   </div>
 </template>
 
@@ -58,6 +63,14 @@ export default {
     params: {
       type: Object,
       default: () => {},
+    },
+    id: {
+      type: String,
+      default: '',
+    },
+    users: {
+      type: Object,
+      default: () => ({}),
     },
   },
   data() {
@@ -165,5 +178,22 @@ export default {
   }
   #text {
     margin: 0.2rem 0.3rem;
+  }
+  .toRight {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 0.5rem;
+  }
+  .username {
+    outline: none;
+    background-color: #2298b9;
+    color: #fff;
+    border-radius: 2rem;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    margin: 0 1rem;
   }
 </style>
