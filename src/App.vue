@@ -11,6 +11,15 @@ import { HubConnectionBuilder } from '@aspnet/signalr';
 import Home from './components/Home.vue';
 import Canvas from './components/Canvas.vue';
 
+function updateQueryStringParameter(uri, key, value) {
+  const re = new RegExp(`([?&])${key}=.*?(&|$)`, 'i');
+  const separator = uri.indexOf('?') !== -1 ? '&' : '?';
+  if (uri.match(re)) {
+    return uri.replace(re, `$1${key}=${value}$2`);
+  }
+  return `${uri + separator + key}=${value}`;
+}
+
 export default {
   name: 'app',
   components: {
@@ -27,8 +36,10 @@ export default {
     async start(username) {
       this.username = username;
       try {
-        const connection = new HubConnectionBuilder().withUrl('https://localhost:5001/ws-server').build();
+        const url = updateQueryStringParameter('https://localhost:5001/ws-server', 'username', username);
+        const connection = new HubConnectionBuilder().withUrl(url).build();
         await connection.start();
+        this.setUpServerAPIs(connection);
         console.log('Connected !');
       } catch (e) {
         console.log(e);
@@ -38,6 +49,11 @@ export default {
     exit() {
       this.username = '';
       this.connected = false;
+    },
+    setUpServerAPIs(connection) {
+      connection.on('drawers', (data) => {
+        console.log(data);
+      });
     },
   },
 };
