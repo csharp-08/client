@@ -6,6 +6,9 @@
     <button @click="setTool('freeLine')" :class="{ active: tool === 'freeLine' }">
       <font-awesome-icon icon="pen"/>
     </button>
+    <button @click="setTool('line')" :class="{ active: tool === 'line' }">
+      <font-awesome-icon icon="pen"/>
+    </button>
     <button @click="setTool('circle')" :class="{ active: tool === 'circle' }">
       <font-awesome-icon icon="circle" />
     </button>

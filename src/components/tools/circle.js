@@ -51,6 +51,13 @@ class Cirle extends Tool {
   getKey(shape) {
     return shape.config.radius;
   }
+
+  // eslint-disable-next-line
+  update(oldConfig, newConfig) {
+    oldConfig.x = newConfig.x;
+    oldConfig.y = newConfig.y;
+    return oldConfig;
+  }
 }
 
 export default Cirle;

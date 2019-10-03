@@ -17,7 +17,7 @@ class FreeLineTool extends Tool {
     }
     return {
       component: this.shapeName,
-      toolName: 'freeLine',
+      toolName: 'line',
       config: {
         points: [event.evt.offsetX, event.evt.offsetY, event.evt.offsetX, event.evt.offsetY],
         stroke: params.color || this.defaultParams.color,
@@ -35,16 +35,22 @@ class FreeLineTool extends Tool {
     if (!event || !event.evt) {
       return;
     }
-    newShape.config.points.push(event.evt.offsetX, event.evt.offsetY);
+    newShape.config.points[2] = event.evt.offsetX;
+    newShape.config.points[3] = event.evt.offsetY;
   }
 
   // eslint-disable-next-line
-  stopDrawing(event, newShape) {}
+  stopDrawing(event, newShape) {
+    if (!event || !event.evt) {
+      return;
+    }
+    newShape.config.points[2] = event.evt.offsetX;
+    newShape.config.points[3] = event.evt.offsetY;
+  }
 
   // eslint-disable-next-line
   getKey(shape) {
-    const [x, y] = shape.config.points;
-    return shape.config.points.length + x + y;
+    return shape.config.points.reduce((sum, p) => sum + p, 0);
   }
 
   // eslint-disable-next-line

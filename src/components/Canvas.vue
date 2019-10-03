@@ -30,6 +30,7 @@ import ToolBox from './ToolBox.vue';
 import FreeLineTool from './tools/freeLineTool';
 import CircleTool from './tools/circle';
 import TextTool from './tools/text';
+import LineTool from './tools/lineTool';
 
 export default {
   name: 'Canvas',
@@ -64,6 +65,7 @@ export default {
         freeLine: new FreeLineTool(),
         circle: new CircleTool(),
         text: new TextTool(),
+        line: new LineTool(),
       },
     };
   },
@@ -87,6 +89,7 @@ export default {
           return;
         }
         this.tools[this.tool].draw(event, newShape);
+        this.$forceUpdate();
       }
     },
     stopDrawing(event) {
@@ -94,6 +97,7 @@ export default {
         const newShape = this.shapes[this.shapes.length - 1] || null;
         this.tools[this.tool].stopDrawing(event, newShape);
         this.isDrawing = false;
+        this.$forceUpdate();
       }
     },
     setTool({ tool, params }) {
@@ -101,8 +105,10 @@ export default {
       this.toolParams = Object.assign(this.toolParams, params);
     },
     handleDragEnd(event, index) {
-      console.log(`Forme n'${index} :`);
-      console.log(event.target.attrs);
+      this.shapes[index].config = this.tools[this.shapes[index].toolName].update(
+        this.shapes[index].config, event.target.attrs,
+      );
+      this.$forceUpdate();
     },
   },
 };

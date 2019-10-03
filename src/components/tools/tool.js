@@ -26,6 +26,11 @@ class Tool {
   getKey(shape) {
     throw new Error('You must implement this function');
   }
+
+  // eslint-disable-next-line
+  update(oldConfig, updateConfig) {
+    return oldConfig;
+  }
 }
 
 export default Tool;

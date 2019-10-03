@@ -17,6 +17,10 @@ class Text extends Tool {
       return null;
     }
 
+    if (!params.text) {
+      return null;
+    }
+
     return {
       component: this.shapeName,
       toolName: 'text',
@@ -46,6 +50,13 @@ class Text extends Tool {
   // eslint-disable-next-line
   getKey(shape) {
     return shape.config.text.length;
+  }
+
+  // eslint-disable-next-line
+  update(oldConfig, newConfig) {
+    oldConfig.x = newConfig.x;
+    oldConfig.y = newConfig.y;
+    return oldConfig;
   }
 }
 
