@@ -9,12 +9,14 @@ class Cirle extends Tool {
       color: 'black',
       strokeWidth: 10,
     };
+    this.count = 0;
   }
 
   startDrawing(event, params) {
     if (!event || !event.evt) {
       return null;
     }
+    this.count += 1;
     const strokeWidth = params.strokeWidth || this.defaultParams.strokeWidth;
     return {
       component: this.shapeName,
@@ -29,6 +31,7 @@ class Cirle extends Tool {
         fillEnabled: false,
         lineCap: 'round',
         lineJoin: 'round',
+        name: `circle-${this.count}`,
       },
     };
   }

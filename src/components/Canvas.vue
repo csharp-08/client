@@ -9,6 +9,7 @@
               ref="toolbox"
     ></tool-box>
     <v-stage :config="configKonva"
+             @click="selectShape"
              @mousedown="startDrawing($event)"
              @mousemove="draw($event)"
              @mouseup="stopDrawing($event)">
@@ -19,6 +20,7 @@
                      :config="{ ...shape.config, draggable: tool === 'select'}"
                      :key="`${index}_${tools[shape.toolName].getKey(shape)}`"></component>
         </template>
+        <v-transformer ref="transformer" @transformend="transformEnd()"></v-transformer>
       </v-layer>
     </v-stage>
   </div>
@@ -105,9 +107,74 @@ export default {
       this.toolParams = Object.assign(this.toolParams, params);
     },
     handleDragEnd(event, index) {
+      console.log('B');
       this.shapes[index].config = this.tools[this.shapes[index].toolName].update(
         this.shapes[index].config, event.target.attrs,
       );
+      this.$forceUpdate();
+    },
+    selectShape(e) {
+      if (this.tool !== 'select') {
+        return;
+      }
+      if (e.target === e.target.getStage()) {
+        this.updateTransformer('');
+        return;
+      }
+
+      // clicked on transformer - do nothing
+      const clickedOnTransformer = e.target.getParent().className === 'Transformer';
+      if (clickedOnTransformer) {
+        return;
+      }
+
+      // find clicked rect by its name
+      const name = e.target.name();
+      this.updateTransformer(name || '');
+    },
+    updateTransformer(nodeName) {
+      const transformerNode = this.$refs.transformer.getStage();
+      const stage = transformerNode.getStage();
+
+      const selectedNode = stage.findOne(`.${nodeName}`);
+      // do nothing if selected node is already attached
+      if (selectedNode === transformerNode.node()) {
+        return;
+      }
+
+      if (selectedNode) {
+        // attach to another node
+        transformerNode.attachTo(selectedNode);
+      } else {
+        // remove transformer
+        transformerNode.detach();
+      }
+      transformerNode.getLayer().batchDraw();
+    },
+    transformEnd() {
+      const transformerNode = this.$refs.transformer.getStage();
+      const node = transformerNode.node();
+
+      if (!node) {
+        return;
+      }
+
+      const newConfig = node.attrs;
+      const index = this.shapes.reduce(
+        (i, o, i2) => (o.config.name === newConfig.name ? i2 : i), null,
+      );
+      if (index === null) {
+        return;
+      }
+
+      this.shapes[index].config = this.tools[this.shapes[index].toolName].update(
+        this.shapes[index].config, newConfig,
+      );
+
+      console.log('A');
+      this.shapes[index].config.scaleX = newConfig.scaleX;
+      this.shapes[index].config.scaleY = newConfig.scaleY;
+      this.shapes[index].config.rotation = newConfig.rotation;
       this.$forceUpdate();
     },
   },

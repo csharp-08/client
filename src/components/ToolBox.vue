@@ -7,7 +7,7 @@
       <font-awesome-icon icon="pen"/>
     </button>
     <button @click="setTool('line')" :class="{ active: tool === 'line' }">
-      <font-awesome-icon icon="pen"/>
+      <span style="font-size: 3rem; line-height: 2rem;">-</span>
     </button>
     <button @click="setTool('circle')" :class="{ active: tool === 'circle' }">
       <font-awesome-icon icon="circle" />

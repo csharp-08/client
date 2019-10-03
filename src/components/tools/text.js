@@ -10,6 +10,7 @@ class Text extends Tool {
       strokeWidth: 10,
       text: '',
     };
+    this.count = 0;
   }
 
   startDrawing(event, params) {
@@ -21,6 +22,7 @@ class Text extends Tool {
       return null;
     }
 
+    this.count += 1;
     return {
       component: this.shapeName,
       toolName: 'text',
@@ -31,6 +33,7 @@ class Text extends Tool {
         fontSize: params.strokeWidth || this.defaultParams.strokeWidth,
         fontFamily: 'Calibri',
         fill: params.color || this.defaultParams.color,
+        name: `text-${this.count}`,
       },
     };
   }
