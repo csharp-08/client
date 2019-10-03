@@ -35,10 +35,11 @@ export default {
     };
   },
   methods: {
-    async start(username) {
+    async start({ username, lobby }) {
       this.username = username;
       try {
-        const url = updateQueryStringParameter('https://localhost:5001/ws-server', 'username', username);
+        let url = updateQueryStringParameter('https://localhost:5001/ws-server', 'username', username);
+        url = updateQueryStringParameter(url, 'lobby', lobby);
         const connection = new HubConnectionBuilder().withUrl(url).build();
         await connection.start();
         this.setUpServerAPIs(connection);

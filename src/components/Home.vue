@@ -4,13 +4,19 @@
       Bienvenue sur le WhiteBoard Collaboratif !
     </h1>
     <form @submit.prevent="submit">
-      <label for="name">Entrez votre surnom:</label>
+      <label for="name">Entrez votre surnom :</label>
       <input id="name"
              autocomplete="off"
              v-model="username"
              :class="{ invalid: invalidInput }"
              placeholder="Surnom..."
              @focus="invalidInput = false"
+      />
+      <label for="lobby">Nom du salon :</label>
+      <input id="lobby"
+             autocomplete="off"
+             v-model="lobby"
+             placeholder="Default"
       />
       <button>Commencer</button>
     </form>
@@ -23,6 +29,7 @@ export default {
   data() {
     return {
       username: '',
+      lobby: 'default',
       invalidInput: false,
     };
   },
@@ -35,8 +42,7 @@ export default {
         }, 50);
         return;
       }
-      console.log(`Your name is ${this.username}`);
-      this.$emit('start', this.username);
+      this.$emit('start', { username: this.username, lobby: this.lobby });
     },
   },
 };
