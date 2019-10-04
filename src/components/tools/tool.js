@@ -8,17 +8,17 @@ class Tool {
   }
 
   // eslint-disable-next-line
-  startDrawing(event) {
+  startDrawing(event, params) {
     throw new Error('You must implement this function');
   }
 
   // eslint-disable-next-line
-  draw(event) {
+  draw(event, newShape) {
     throw new Error('You must implement this function');
   }
 
   // eslint-disable-next-line
-  stopDrawing(event) {
+  stopDrawing(event, newShape) {
     throw new Error('You must implement this function');
   }
 

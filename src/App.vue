@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <Canvas v-if="connected" :id="id" :users="users" @exit="exit"></Canvas>
+    <Canvas v-if="connected" :id="id" :connection="connection" :users="users" @exit="exit"></Canvas>
     <Home @start="start($event)" v-else ></Home>
   </div>
 </template>
@@ -29,6 +29,7 @@ export default {
   data() {
     return {
       connected: false,
+      connection: null,
       username: '',
       users: {},
       id: '',
@@ -38,11 +39,12 @@ export default {
     async start({ username, lobby }) {
       this.username = username;
       try {
+
         let url = updateQueryStringParameter('https://localhost:5001/ws-server', 'username', username);
         url = updateQueryStringParameter(url, 'lobby', lobby);
-        const connection = new HubConnectionBuilder().withUrl(url).build();
-        await connection.start();
-        this.setUpServerAPIs(connection);
+        this.connection = new HubConnectionBuilder().withUrl(url).build();
+        await this.connection.start();
+        this.setUpServerAPIs(this.connection);
         console.log('Connected !');
       } catch (e) {
         console.log(e);
