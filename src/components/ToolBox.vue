@@ -192,11 +192,12 @@ export default {
   }
   .username {
     outline: none;
-    background-color: #2298b9;
+    background-color: #006a89;
     color: #fff;
     border-radius: 2rem;
     border: none;
     padding: 0.6rem 1.2rem;
     margin: 0 1rem;
+    font-weight: bold;
   }
 </style>

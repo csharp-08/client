@@ -8,26 +8,39 @@
               :users="users"
               ref="toolbox"
     ></tool-box>
-    <v-stage :config="configKonva"
-             @click="selectShape"
-             @mousedown="startDrawing($event)"
-             @mousemove="draw($event)"
-             @mouseup="stopDrawing($event)">
-      <v-layer>
-        <template v-for="(shape, index) in shapes">
-          <component :is="shape.component"
-                     @dragend="handleDragEnd($event, index)"
-                     :config="{ ...shape.config, draggable: tool === 'select'}"
-                     :key="`${index}_${tools[shape.toolName].getKey(shape)}`"></component>
-        </template>
-        <v-transformer ref="transformer" @transformend="transformEnd()"></v-transformer>
-      </v-layer>
-    </v-stage>
+    <ShapeParams v-if="showParams"></ShapeParams>
+    <div class="stage-container" :class="{ showParams }">
+      <v-stage :config="configKonva"
+               @click="selectShape"
+               @mousedown="startDrawing($event)"
+               @mousemove="draw($event)"
+               @mouseup="stopDrawing($event)">
+        <v-layer>
+          <template v-for="(shape, index) in shapes">
+            <component :is="shape.component"
+                       @dragmove="updateLineTransformer"
+                       @dragend="handleDragEnd($event, index)"
+                       :config="{ ...shape.config, draggable: tool === 'select'}"
+                       :key="`${index}_${tools[shape.toolName].getKey(shape)}`"></component>
+          </template>
+          <v-transformer ref="transformer"
+                         @transformend="transformEnd()"
+                         :rotationSnaps="[0, 90, 180, 270]"></v-transformer>
+          <CustomLineTransformer
+            ref="lineTransformer"
+            @transformend="transformLineEnd()"
+            v-if="selectedLine !== null"
+            :line-node="selectedLine"></CustomLineTransformer>
+        </v-layer>
+      </v-stage>
+    </div>
   </div>
 </template>
 
 <script>
 import ToolBox from './ToolBox.vue';
+import ShapeParams from './ShapeParams.vue';
+import CustomLineTransformer from './CustomLineTransformer.vue';
 
 import FreeLineTool from './tools/freeLineTool';
 import CircleTool from './tools/circle';
@@ -38,6 +51,8 @@ export default {
   name: 'Canvas',
   components: {
     ToolBox,
+    ShapeParams,
+    CustomLineTransformer,
   },
   props: {
     id: {
@@ -69,6 +84,8 @@ export default {
         text: new TextTool(),
         line: new LineTool(),
       },
+      showParams: false,
+      selectedLine: null,
     };
   },
   methods: {
@@ -107,7 +124,6 @@ export default {
       this.toolParams = Object.assign(this.toolParams, params);
     },
     handleDragEnd(event, index) {
-      console.log('B');
       this.shapes[index].config = this.tools[this.shapes[index].toolName].update(
         this.shapes[index].config, event.target.attrs,
       );
@@ -139,16 +155,34 @@ export default {
       const selectedNode = stage.findOne(`.${nodeName}`);
       // do nothing if selected node is already attached
       if (selectedNode === transformerNode.node()) {
+        this.showParams = false;
+        this.selectedLine = null;
         return;
       }
 
+      if (selectedNode && nodeName && nodeName.split('-')[0] === 'line') {
+        this.selectedLine = selectedNode;
+        if (this.$refs.lineTransformer) {
+          this.$nextTick(() => {
+            this.$refs.lineTransformer.init();
+          });
+        }
+        transformerNode.detach();
+        transformerNode.getLayer().batchDraw();
+        this.showParams = true;
+        return;
+      }
       if (selectedNode) {
         // attach to another node
         transformerNode.attachTo(selectedNode);
+        console.log(transformerNode.borderStroke());
+        this.showParams = true;
       } else {
         // remove transformer
         transformerNode.detach();
+        this.showParams = false;
       }
+      this.selectedLine = null;
       transformerNode.getLayer().batchDraw();
     },
     transformEnd() {
@@ -171,11 +205,28 @@ export default {
         this.shapes[index].config, newConfig,
       );
 
-      console.log('A');
       this.shapes[index].config.scaleX = newConfig.scaleX;
       this.shapes[index].config.scaleY = newConfig.scaleY;
       this.shapes[index].config.rotation = newConfig.rotation;
       this.$forceUpdate();
+    },
+    updateLineTransformer() {
+      if (this.$refs.lineTransformer) {
+        this.$refs.lineTransformer.init();
+      }
+    },
+    transformLineEnd() {
+      if (!this.selectedLine) {
+        return;
+      }
+      const newConfig = this.selectedLine.attrs;
+      const index = this.shapes.reduce(
+        (i, o, i2) => (o.config.name === newConfig.name ? i2 : i), null,
+      );
+      if (index === null) {
+        return;
+      }
+      this.shapes[index].config.points = newConfig.points;
     },
   },
 };
@@ -185,5 +236,14 @@ export default {
 .container {
   width: 100vw;
   height: 100vh;
+}
+.stage-container {
+  width: 100vw;
+  height: CALC(100vh - 50px);
+  overflow: auto;
+}
+.stage-container.showParams {
+  width: CALC(100vw - 400px);
+  margin-right: 400px;
 }
 </style>
