@@ -282,7 +282,7 @@ export default {
           return this.tools.text.convertJSONToShape(json);
         case 'Line':
           if (json.vertices.length == 2) {
-            return this.tools.Line.convertJSONToShape(json);
+            return this.tools.line.convertJSONToShape(json);
           }
           return this.tools.freeLine.convertJSONToShape(json);
         case 'Circle':
