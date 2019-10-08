@@ -125,12 +125,12 @@ export default {
       this.$forceUpdate();
     },
     convertShapeToJSON(shape) {
-      var points = [];
-      var previous = 0;
+      const points = [];
+      let previous = 0;
 
       switch (shape.toolName) {
         case 'freeLine':
-          shape.config.points.forEach((item, index, _array) => {
+          shape.config.points.forEach((item, index) => {
             if (index % 2) {
               points.push({ Item1: previous, Item2: item });
             } else {
@@ -141,8 +141,7 @@ export default {
           return JSON.stringify({
             Vertices: points,
             Thickness: shape.config.strokeWidth,
-            Color: shape.config.color,
-            Owner: { ID: this.id, username: 'lol non' },
+            Color: shape.config.stroke,
           });
         default:
           return 'error';
@@ -156,7 +155,7 @@ export default {
             toolName: 'freeLine',
             config: {
               points: json.vertices.flatMap(x => [x.item1, x.item2]),
-              stroke: 'blue',
+              stroke: json.color,
               strokeWidth: json.thickness,
               lineCap: 'round',
               lineJoin: 'round',
