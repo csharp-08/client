@@ -26,8 +26,8 @@ export default {
   data() {
     return {
       aConfig: {
-        x: 20,
-        y: 50,
+        x: 0,
+        y: 0,
         width: 10,
         height: 10,
         fill: 'white',
@@ -37,8 +37,8 @@ export default {
         draggable: true,
       },
       bConfig: {
-        x: 60,
-        y: 100,
+        x: 0,
+        y: 0,
         width: 10,
         height: 10,
         fill: 'white',
