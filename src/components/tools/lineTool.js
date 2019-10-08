@@ -88,7 +88,7 @@ class LineTool extends Tool {
   convertJSONToShape(json) {
     return {
       component: 'v-Line',
-      toolName: 'freeLine',
+      toolName: 'line',
       config: {
         points: json.vertices.flatMap(x => [x.item1, x.item2]),
         stroke: json.color,

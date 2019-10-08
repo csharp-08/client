@@ -278,11 +278,12 @@ export default {
     },
     convertJSONToShape(shapeType, json) {
       switch (shapeType) {
-        case 'FreeLine':
-          return this.tools.freeLine.convertJSONToShape(json);
         case 'Text':
           return this.tools.text.convertJSONToShape(json);
         case 'Line':
+          if (json.vertices.length == 2) {
+            return this.tools.Line.convertJSONToShape(json);
+          }
           return this.tools.freeLine.convertJSONToShape(json);
         case 'Circle':
           return this.tools.circle.convertJSONToShape(json);
