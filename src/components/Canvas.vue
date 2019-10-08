@@ -19,18 +19,14 @@
                @mousemove="draw($event)"
                @mouseup="stopDrawing($event)">
         <v-layer>
-          <template v-for="(shape, index) in shapes">
-            <component :is="shape.component"
-                       @dragmove="updateLineTransformer"
-                       @dragend="handleDragEnd($event, index)"
-                       :config="{ ...shape.config, draggable: tool === 'select'}"
-                       :key="`${index}_${tools[shape.toolName].getKey(shape)}`"></component>
-          </template>
-          <template v-for="(shape, index) in temporaryShape">
-            <component :is="shape.component"
-                      @dragend="handleDragEnd($event, index)"
-                      :config="{ ...shape.config, draggable: tool === 'select'}"
-                      :key="`${index}_${tools[shape.toolName].getKey(shape)}`"></component>
+          <template v-for="(shapeList, i) in [shapes, temporaryShape]">
+            <template v-for="(shape, index) in shapeList">
+              <component :is="shape.component"
+                        @dragmove="updateLineTransformer"
+                        @dragend="handleDragEnd($event, index)"
+                        :config="{ ...shape.config, draggable: tool === 'select'}"
+                        :key="`${i}_{index}_${tools[shape.toolName].getKey(shape)}`"></component>
+            </template>
           </template>
           <v-transformer ref="transformer"
                          @transformend="transformEnd()"
@@ -117,14 +113,14 @@ export default {
       if (Object.keys(this.tools).includes(this.tool)) {
         const newShape = this.tools[this.tool].startDrawing(event, this.toolParams);
         if (newShape !== null) {
-          this.shapes.push(newShape);
+          this.temporaryShape.push(newShape);
           this.isDrawing = true;
         }
       }
     },
     draw(event) {
       if (this.isDrawing) {
-        const newShape = this.shapes[this.shapes.length - 1] || null;
+        const newShape = this.temporaryShape[this.temporaryShape.length - 1] || null;
         if (newShape === null) {
           return;
         }
@@ -132,15 +128,26 @@ export default {
         this.$forceUpdate();
       }
     },
-    stopDrawing(event) {
+    async stopDrawing(event) {
       if (this.isDrawing) {
-        const newShape = this.shapes[this.shapes.length - 1] || null;
+        const currentIndex = this.temporaryShape.length - 1;
         const currentTool = this.tools[this.tool];
-        currentTool.stopDrawing(event, newShape);   
-        this.connection.invoke('AddShape', currentTool.getClass(), currentTool.convertShapeToJSON(newShape))
-          .catch(err => console.error(err.toString()));
-        console.log('sent');
+        const newShape = this.temporaryShape[currentIndex] || null;
+        currentTool.stopDrawing(event, newShape);
         this.isDrawing = false;
+
+        try {
+          await this.connection.invoke('AddShape', currentTool.getClass(), currentTool.convertShapeToJSON(newShape));
+        } catch (err) {
+          console.error(err.toString());
+          console.log('failed sending');
+          this.temporaryShape.pop(currentIndex);
+          this.$forceUpdate();
+          return;
+        }
+
+        console.log('succeded sending');
+        this.shapes.push(this.temporaryShape.pop(currentIndex));
         this.$forceUpdate();
       }
     },
