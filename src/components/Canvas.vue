@@ -25,7 +25,7 @@
                         @dragmove="updateLineTransformer"
                         @dragend="handleDragEnd($event, index)"
                         :config="{ ...shape.config, draggable: tool === 'select'}"
-                        :key="`${i}_{index}_${tools[shape.toolName].getKey(shape)}`"></component>
+                        :key="`${i}_${index}_${tools[shape.toolName].getKey(shape)}`"></component>
             </template>
           </template>
           <v-transformer ref="transformer"
@@ -76,11 +76,8 @@ export default {
   mounted() {
     this.configKonva.width = this.$refs.container.clientWidth;
     this.configKonva.height = this.$refs.container.clientHeight - 51;
-    console.log(this.connection);
     this.connection.on('newShape', (shapeType, shape) => {
       console.log('received new shape');
-      console.log(shape);
-      console.log(this.convertJSONToShape(shapeType, shape));
       this.shapes.push(this.convertJSONToShape(shapeType, shape));
     });
   },
@@ -134,6 +131,8 @@ export default {
         const currentTool = this.tools[this.tool];
         const newShape = this.temporaryShape[currentIndex] || null;
         currentTool.stopDrawing(event, newShape);
+        this.connection.invoke('AddShape', currentTool.getClass(), currentTool.convertShapeToJSON(newShape))
+          .catch(err => console.error(err.toString()));
         this.isDrawing = false;
 
         try {
@@ -208,7 +207,6 @@ export default {
         // attach to another node
         this.selectedNode = selectedNode;
         transformerNode.attachTo(selectedNode);
-        console.log(transformerNode.borderStroke());
       } else {
         // remove transformer
         this.selectedNode = null;
@@ -261,7 +259,6 @@ export default {
       this.shapes[index].config.points = newConfig.points;
     },
     updateNode({ param, value }) {
-      console.log(param, value);
       if (!this.selectedNode) {
         return;
       }
@@ -281,7 +278,7 @@ export default {
         case 'Text':
           return this.tools.text.convertJSONToShape(json);
         case 'Line':
-          if (json.vertices.length == 2) {
+          if (json.vertices.length === 2) {
             return this.tools.line.convertJSONToShape(json);
           }
           return this.tools.freeLine.convertJSONToShape(json);

@@ -67,9 +67,18 @@ class Text extends Tool {
 
     return JSON.stringify({
       Vertices: [{ Item1: shape.config.x, Item2: shape.config.y }],
-      Thickness: shape.config.fontSize,
-      Color: shape.config.fill,
-      Text: shape.config.text,
+      InnerText: shape.config.text,
+      Config: {
+        BorderColor: shape.config.stroke,
+        Color: shape.config.fill,
+        IsEmpty: shape.config.fillEnabled || false,
+        OffsetX: 0,
+        OffsetY: 0,
+        Rotate: shape.config.rotation,
+        ScaleX: shape.config.scaleX,
+        ScaleY: shape.config.scaleY,
+        Thickness: shape.config.strokeWidth,
+      },
     });
   }
 
@@ -79,12 +88,19 @@ class Text extends Tool {
       component: 'v-text',
       toolName: 'text',
       config: {
+        name: `text-${json.id}`,
         x: json.vertices[0].item1,
         y: json.vertices[0].item2,
         text: json.innerText,
-        fontSize: json.thickness,
+        fontSize: json.fontSize || 10,
         fontFamily: 'Calibri',
-        fill: json.color || this.defaultParams.color,
+        stroke: json.config.borderColor,
+        strokeWidth: json.config.thickness,
+        fill: json.config.color,
+        fillEnabled: json.config.isEmpty,
+        rotation: json.config.rotate || 0,
+        scaleX: json.config.scaleX || 1,
+        scaleY: json.config.scaleY || 1,
       },
     };
   }

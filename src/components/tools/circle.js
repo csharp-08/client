@@ -61,6 +61,51 @@ class Cirle extends Tool {
     oldConfig.y = newConfig.y;
     return oldConfig;
   }
+
+  // eslint-disable-next-line
+  convertShapeToJSON(shape) {
+    return JSON.stringify({
+      Vertices: [{ Item1: shape.config.x, Item2: shape.config.y }],
+      Radius: shape.config.radius,
+      Config: {
+        BorderColor: shape.config.stroke,
+        Color: shape.config.fill,
+        IsEmpty: shape.config.fillEnabled || false,
+        OffsetX: 0,
+        OffsetY: 0,
+        Rotate: shape.config.rotation,
+        ScaleX: shape.config.scaleX,
+        ScaleY: shape.config.scaleY,
+        Thickness: shape.config.strokeWidth,
+      },
+    });
+  }
+
+  // eslint-disable-next-line
+  convertJSONToShape(json) {
+    const points = json.vertices.flatMap(x => [x.item1, x.item2]);
+
+    return {
+      component: this.shapeName,
+      toolName: 'circle',
+      config: {
+        radius: json.radius,
+        minRadius: json.config.thickness / 2,
+        name: `circle-${json.id}`,
+        stroke: json.config.borderColor,
+        strokeWidth: json.config.thickness,
+        fill: json.config.color,
+        fillEnabled: json.config.isEmpty,
+        x: points[0],
+        y: points[1],
+        rotation: json.config.rotate || 0,
+        scaleX: json.config.scaleX || 1,
+        scaleY: json.config.scaleY || 1,
+        lineCap: 'round',
+        lineJoin: 'round',
+      },
+    };
+  }
 }
 
 export default Cirle;

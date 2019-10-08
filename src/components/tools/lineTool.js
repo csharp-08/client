@@ -79,8 +79,15 @@ class LineTool extends Tool {
 
     return JSON.stringify({
       Vertices: points,
+      BorderColor: shape.config.stroke,
+      Color: shape.config.fill,
+      IsEmpty: shape.config.fillEnabled || false,
+      OffsetX: shape.config.x,
+      OffsetY: shape.config.y,
+      Rotate: shape.config.rotation,
+      ScaleX: shape.config.scaleX,
+      ScaleY: shape.config.scaleY,
       Thickness: shape.config.strokeWidth,
-      Color: shape.config.stroke,
     });
   }
 
@@ -90,9 +97,17 @@ class LineTool extends Tool {
       component: 'v-Line',
       toolName: 'line',
       config: {
+        name: `line-${json.id}`,
         points: json.vertices.flatMap(x => [x.item1, x.item2]),
-        stroke: json.color,
-        strokeWidth: json.thickness,
+        stroke: json.config.borderColor,
+        strokeWidth: json.config.thickness,
+        fill: json.config.color,
+        fillEnabled: json.config.isEmpty,
+        x: json.config.offsetX,
+        y: json.config.offsetY,
+        rotation: json.config.rotate || 0,
+        scaleX: json.config.scaleX || 1,
+        scaleY: json.config.scaleY || 1,
         lineCap: 'round',
         lineJoin: 'round',
       },
