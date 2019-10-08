@@ -58,6 +58,38 @@ class Text extends Tool {
     oldConfig.y = newConfig.y;
     return oldConfig;
   }
+
+  // eslint-disable-next-line
+  convertShapeToJSON(shape) {
+
+    return JSON.stringify({
+      Vertices: [{ Item1: shape.config.x, Item2: shape.config.y }],
+      Thickness: shape.config.fontSize,
+      Color: shape.config.fill,
+      Text: shape.config.text,
+    });
+  }
+
+  // eslint-disable-next-line
+  convertJSONToShape(json) {
+    return {
+      component: 'v-text',
+      toolName: 'text',
+      config: {
+        x: json.vertices[0].item1,
+        y: json.vertices[0].item2,
+        text: json.innerText,
+        fontSize: json.thickness,
+        fontFamily: 'Calibri',
+        fill: json.color || this.defaultParams.color,
+      },
+    };
+  }
+
+  // eslint-disable-next-line
+  getClass() {
+    return 'Text';
+  }
 }
 
 export default Text;
