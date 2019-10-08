@@ -8,17 +8,17 @@ class Tool {
   }
 
   // eslint-disable-next-line
-  startDrawing(event) {
+  startDrawing(event, params) {
     throw new Error('You must implement this function');
   }
 
   // eslint-disable-next-line
-  draw(event) {
+  draw(event, newShape) {
     throw new Error('You must implement this function');
   }
 
   // eslint-disable-next-line
-  stopDrawing(event) {
+  stopDrawing(event, newShape) {
     throw new Error('You must implement this function');
   }
 
@@ -30,6 +30,21 @@ class Tool {
   // eslint-disable-next-line
   update(oldConfig, updateConfig) {
     return oldConfig;
+  }
+
+  // eslint-disable-next-line
+  convertShapeToJSON() {
+    throw new Error('You must implement this function');
+  }
+
+  // eslint-disable-next-line
+  convertJSONToShape(json) {
+    throw new Error('You must implement this function');
+  }
+
+  // eslint-disable-next-line
+  getClass() {
+    throw new Error('You must implement this function');
   }
 }
 

@@ -55,6 +55,47 @@ class FreeLineTool extends Tool {
     oldConfig.y = newConfig.y;
     return oldConfig;
   }
+
+  // eslint-disable-next-line
+  convertShapeToJSON(shape) {
+
+    const points = [];
+    let previous = 0;
+
+    shape.config.points.forEach((item, index) => {
+      if (index % 2) {
+        points.push({ Item1: previous, Item2: item });
+      } else {
+        previous = item;
+      }
+    });
+
+    return JSON.stringify({
+      Vertices: points,
+      Thickness: shape.config.strokeWidth,
+      Color: shape.config.stroke,
+    });
+  }
+
+  // eslint-disable-next-line
+  convertJSONToShape(json) {
+    return {
+      component: 'v-Line',
+      toolName: 'freeLine',
+      config: {
+        points: json.vertices.flatMap(x => [x.item1, x.item2]),
+        stroke: json.color,
+        strokeWidth: json.thickness,
+        lineCap: 'round',
+        lineJoin: 'round',
+      },
+    };
+  }
+
+  // eslint-disable-next-line
+  getClass() {
+    return 'Line';
+  }
 }
 
 export default FreeLineTool;

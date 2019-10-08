@@ -66,10 +66,21 @@ export default {
       type: Object,
       default: () => ({}),
     },
+    connection: {
+      type: Object,
+      default: () => ({}),
+    },
   },
   mounted() {
     this.configKonva.width = this.$refs.container.clientWidth;
     this.configKonva.height = this.$refs.container.clientHeight - 51;
+    console.log(this.connection);
+    this.connection.on('newShape', (shapeType, shape) => {
+      console.log('received new shape');
+      console.log(shape);
+      console.log(this.convertJSONToShape(shapeType, shape));
+      this.shapes.push(this.convertJSONToShape(shapeType, shape));
+    });
   },
   data() {
     return {
@@ -117,7 +128,11 @@ export default {
     stopDrawing(event) {
       if (this.isDrawing) {
         const newShape = this.shapes[this.shapes.length - 1] || null;
-        this.tools[this.tool].stopDrawing(event, newShape);
+        const currentTool = this.tools[this.tool];
+        currentTool.stopDrawing(event, newShape);
+        this.connection.invoke('AddShape', currentTool.getClass(), currentTool.convertShapeToJSON(newShape))
+          .catch(err => console.error(err.toString()));
+        console.log('sent');
         this.isDrawing = false;
         this.$forceUpdate();
       }
@@ -246,6 +261,14 @@ export default {
       this.selectedNode.attrs[param] = value;
       this.shapes[index].config[param] = value;
       this.selectedNode.getLayer().batchDraw();
+    },
+    convertJSONToShape(shapeType, json) {
+      switch (shapeType) {
+        case 'Line':
+          return this.tools.freeLine.convertJSONToShape(json);
+        default:
+          return 'error';
+      }
     },
   },
 };
