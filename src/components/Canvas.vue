@@ -26,6 +26,12 @@
                        :config="{ ...shape.config, draggable: tool === 'select'}"
                        :key="`${index}_${tools[shape.toolName].getKey(shape)}`"></component>
           </template>
+          <template v-for="(shape, index) in temporaryShape">
+            <component :is="shape.component"
+                      @dragend="handleDragEnd($event, index)"
+                      :config="{ ...shape.config, draggable: tool === 'select'}"
+                      :key="`${index}_${tools[shape.toolName].getKey(shape)}`"></component>
+          </template>
           <v-transformer ref="transformer"
                          @transformend="transformEnd()"
                          :rotationSnaps="[0, 90, 180, 270]"></v-transformer>
@@ -89,6 +95,7 @@ export default {
         height: 0,
       },
       shapes: [],
+      temporaryShape: [],
       isDrawing: false,
       toolParams: {},
       tool: 'select',
@@ -129,7 +136,7 @@ export default {
       if (this.isDrawing) {
         const newShape = this.shapes[this.shapes.length - 1] || null;
         const currentTool = this.tools[this.tool];
-        currentTool.stopDrawing(event, newShape);
+        currentTool.stopDrawing(event, newShape);   
         this.connection.invoke('AddShape', currentTool.getClass(), currentTool.convertShapeToJSON(newShape))
           .catch(err => console.error(err.toString()));
         console.log('sent');
