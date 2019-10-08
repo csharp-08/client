@@ -8,8 +8,11 @@
               :users="users"
               ref="toolbox"
     ></tool-box>
-    <ShapeParams v-if="showParams"></ShapeParams>
-    <div class="stage-container" :class="{ showParams }">
+    <ShapeParams v-if="selectedNode !== null"
+                 :node="selectedNode"
+                 @update-node="updateNode($event)"
+                 :key="selectedNode.attrs.name"></ShapeParams>
+    <div class="stage-container" :class="{ showParams: selectedNode !== null}">
       <v-stage :config="configKonva"
                @click="selectShape"
                @mousedown="startDrawing($event)"
@@ -84,8 +87,8 @@ export default {
         text: new TextTool(),
         line: new LineTool(),
       },
-      showParams: false,
       selectedLine: null,
+      selectedNode: null,
     };
   },
   methods: {
@@ -155,13 +158,14 @@ export default {
       const selectedNode = stage.findOne(`.${nodeName}`);
       // do nothing if selected node is already attached
       if (selectedNode === transformerNode.node()) {
-        this.showParams = false;
+        this.selectedNode = null;
         this.selectedLine = null;
         return;
       }
 
       if (selectedNode && nodeName && nodeName.split('-')[0] === 'line') {
         this.selectedLine = selectedNode;
+        this.selectedNode = selectedNode;
         if (this.$refs.lineTransformer) {
           this.$nextTick(() => {
             this.$refs.lineTransformer.init();
@@ -169,18 +173,17 @@ export default {
         }
         transformerNode.detach();
         transformerNode.getLayer().batchDraw();
-        this.showParams = true;
         return;
       }
       if (selectedNode) {
         // attach to another node
+        this.selectedNode = selectedNode;
         transformerNode.attachTo(selectedNode);
         console.log(transformerNode.borderStroke());
-        this.showParams = true;
       } else {
         // remove transformer
+        this.selectedNode = null;
         transformerNode.detach();
-        this.showParams = false;
       }
       this.selectedLine = null;
       transformerNode.getLayer().batchDraw();
@@ -227,6 +230,22 @@ export default {
         return;
       }
       this.shapes[index].config.points = newConfig.points;
+    },
+    updateNode({ param, value }) {
+      console.log(param, value);
+      if (!this.selectedNode) {
+        return;
+      }
+      const newConfig = this.selectedNode.attrs;
+      const index = this.shapes.reduce(
+        (i, o, i2) => (o.config.name === newConfig.name ? i2 : i), null,
+      );
+      if (index === null) {
+        return;
+      }
+      this.selectedNode.attrs[param] = value;
+      this.shapes[index].config[param] = value;
+      this.selectedNode.getLayer().batchDraw();
     },
   },
 };
