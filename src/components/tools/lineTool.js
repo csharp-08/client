@@ -9,12 +9,14 @@ class LineTool extends Tool {
       color: 'black',
       strokeWidth: 10,
     };
+    this.count = 0;
   }
 
   startDrawing(event, params) {
     if (!event || !event.evt) {
       return null;
     }
+    this.count += 1;
     return {
       component: this.shapeName,
       toolName: 'line',
@@ -26,6 +28,7 @@ class LineTool extends Tool {
         lineJoin: 'round',
         x: 0,
         y: 0,
+        name: `line-${this.count}`,
       },
     };
   }
@@ -55,13 +58,8 @@ class LineTool extends Tool {
 
   // eslint-disable-next-line
   update(oldConfig, newConfig) {
-    const { x, y } = newConfig;
-    for (let i = 0; i < oldConfig.points.length; i += 2) {
-      oldConfig.points[i] += x;
-      oldConfig.points[i + 1] += y;
-    }
-    oldConfig.x = 0;
-    oldConfig.y = 0;
+    oldConfig.x = newConfig.x;
+    oldConfig.y = newConfig.y;
     return oldConfig;
   }
 

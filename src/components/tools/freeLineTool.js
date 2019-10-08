@@ -9,12 +9,14 @@ class FreeLineTool extends Tool {
       color: 'black',
       strokeWidth: 10,
     };
+    this.count = 0;
   }
 
   startDrawing(event, params) {
     if (!event || !event.evt) {
       return null;
     }
+    this.count += 1;
     return {
       component: this.shapeName,
       toolName: 'freeLine',
@@ -26,6 +28,7 @@ class FreeLineTool extends Tool {
         lineJoin: 'round',
         x: 0,
         y: 0,
+        name: `freeline-${this.count}`,
       },
     };
   }
@@ -43,19 +46,13 @@ class FreeLineTool extends Tool {
 
   // eslint-disable-next-line
   getKey(shape) {
-    const [x, y] = shape.config.points;
-    return shape.config.points.length + x + y;
+    return shape.config.points.length;
   }
 
   // eslint-disable-next-line
   update(oldConfig, newConfig) {
-    const { x, y } = newConfig;
-    for (let i = 0; i < oldConfig.points.length; i += 2) {
-      oldConfig.points[i] += x;
-      oldConfig.points[i + 1] += y;
-    }
-    oldConfig.x = 0;
-    oldConfig.y = 0;
+    oldConfig.x = newConfig.x;
+    oldConfig.y = newConfig.y;
     return oldConfig;
   }
 
