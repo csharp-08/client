@@ -131,8 +131,6 @@ export default {
         const currentTool = this.tools[this.tool];
         const newShape = this.temporaryShape[currentIndex] || null;
         currentTool.stopDrawing(event, newShape);
-        this.connection.invoke('AddShape', currentTool.getClass(), currentTool.convertShapeToJSON(newShape))
-          .catch(err => console.error(err.toString()));
         this.isDrawing = false;
 
         try {
