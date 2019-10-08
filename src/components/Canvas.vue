@@ -106,8 +106,9 @@ export default {
     stopDrawing(event) {
       if (this.isDrawing) {
         const newShape = this.shapes[this.shapes.length - 1] || null;
-        this.tools[this.tool].stopDrawing(event, newShape);
-        this.connection.invoke('AddShape', this.getType(newShape), this.convertShapeToJSON(newShape))
+        const currentTool = this.tools[this.tool];
+        currentTool.stopDrawing(event, newShape);
+        this.connection.invoke('AddShape', currentTool.getClass(), currentTool.convertShapeToJSON(newShape))
           .catch(err => console.error(err.toString()));
         console.log('sent');
         this.isDrawing = false;
@@ -124,51 +125,11 @@ export default {
       );
       this.$forceUpdate();
     },
-    convertShapeToJSON(shape) {
-      const points = [];
-      let previous = 0;
-
-      switch (shape.toolName) {
-        case 'freeLine':
-          shape.config.points.forEach((item, index) => {
-            if (index % 2) {
-              points.push({ Item1: previous, Item2: item });
-            } else {
-              previous = item;
-            }
-          });
-
-          return JSON.stringify({
-            Vertices: points,
-            Thickness: shape.config.strokeWidth,
-            Color: shape.config.stroke,
-          });
-        default:
-          return 'error';
-      }
-    },
+    
     convertJSONToShape(shapeType, json) {
       switch (shapeType) {
         case 'Line':
-          return {
-            component: 'v-Line',
-            toolName: 'freeLine',
-            config: {
-              points: json.vertices.flatMap(x => [x.item1, x.item2]),
-              stroke: json.color,
-              strokeWidth: json.thickness,
-              lineCap: 'round',
-              lineJoin: 'round',
-            },
-          };
-        default:
-          return 'error';
-      }
-    },
-    getType(shape) {
-      switch (shape.toolName) {
-        case 'freeLine':
-          return 'Line';
+          return this.tools['freeLine'].convertJSONToShape(json)
         default:
           return 'error';
       }
