@@ -99,7 +99,7 @@ export default {
     },
     updateNode(p) {
       if (this.properties[p].type > 1) {
-        this.$emit('update-node', { param: p, value: parseInt(this.params[p], 10) });
+        this.$emit('update-node', { param: p, value: Math.max(parseInt(this.params[p], 10), 3) });
       } else {
         this.$emit('update-node', { param: p, value: this.params[p] });
       }
