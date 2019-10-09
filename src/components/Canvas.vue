@@ -135,9 +135,10 @@ export default {
     },
     async stopDrawing(event) {
       if (this.isDrawing) {
-        const currentIndex = this.temporaryShape.length - 1;
         const currentTool = this.tools[this.tool];
+        const currentIndex = this.temporaryShape.length - 1;
         const newShape = this.temporaryShape[currentIndex] || null;
+        const idTempShape = newShape.id;
         currentTool.stopDrawing(event, newShape);
         this.isDrawing = false;
 
@@ -146,12 +147,25 @@ export default {
         } catch (err) {
           console.error(err.toString());
           console.log('failed sending');
-          this.temporaryShape.pop(currentIndex);
+          this.temporaryShape.some((value, index) => {
+            if (value.id === idTempShape) {
+              this.temporaryShape.pop(index);
+              return true;
+            }
+            return false;
+          });
           this.$forceUpdate();
           return;
         }
 
-        this.shapes.push(this.temporaryShape.pop(currentIndex));
+        console.log('succeded sending');
+        this.temporaryShape.some((value, index) => {
+          if (value.id === idTempShape) {
+            this.shapes.push(this.temporaryShape.pop(index));
+            return true;
+          }
+          return false;
+        });
         this.$forceUpdate();
       }
     },
