@@ -63,10 +63,11 @@ class Cirle extends Tool {
   }
 
   // eslint-disable-next-line
-  convertShapeToJSON(shape) {
+  convertShapeToJSON(shape, ID = null) {
     return JSON.stringify({
       Vertices: [{ Item1: shape.config.x, Item2: shape.config.y }],
       Radius: shape.config.radius,
+      ID: ID || undefined,
       Config: {
         BorderColor: shape.config.stroke,
         Color: shape.config.fill,
@@ -84,7 +85,7 @@ class Cirle extends Tool {
   // eslint-disable-next-line
   convertJSONToShape(json) {
     const points = json.vertices.flatMap(x => [x.item1, x.item2]);
-
+    console.log(json);
     return {
       component: this.shapeName,
       toolName: 'circle',
@@ -105,6 +106,11 @@ class Cirle extends Tool {
         lineJoin: 'round',
       },
     };
+  }
+
+  // eslint-disable-next-line
+  getClass() {
+    return 'Circle';
   }
 }
 

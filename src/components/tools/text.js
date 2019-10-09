@@ -63,15 +63,17 @@ class Text extends Tool {
   }
 
   // eslint-disable-next-line
-  convertShapeToJSON(shape) {
+  convertShapeToJSON(shape, ID = null) {
 
     return JSON.stringify({
       Vertices: [{ Item1: shape.config.x, Item2: shape.config.y }],
+      ID: ID || undefined,
       InnerText: shape.config.text,
+      FontSize: shape.config.fontSize,
       Config: {
         BorderColor: shape.config.stroke,
         Color: shape.config.fill,
-        IsEmpty: shape.config.fillEnabled || false,
+        IsEmpty: shape.config.fillEnabled || true,
         OffsetX: 0,
         OffsetY: 0,
         Rotate: shape.config.rotation,

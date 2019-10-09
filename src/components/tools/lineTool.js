@@ -64,7 +64,7 @@ class LineTool extends Tool {
   }
 
   // eslint-disable-next-line
-  convertShapeToJSON(shape) {
+  convertShapeToJSON(shape, ID = null) {
 
     const points = [];
     let previous = 0;
@@ -79,15 +79,18 @@ class LineTool extends Tool {
 
     return JSON.stringify({
       Vertices: points,
-      BorderColor: shape.config.stroke,
-      Color: shape.config.fill,
-      IsEmpty: shape.config.fillEnabled || false,
-      OffsetX: shape.config.x,
-      OffsetY: shape.config.y,
-      Rotate: shape.config.rotation,
-      ScaleX: shape.config.scaleX,
-      ScaleY: shape.config.scaleY,
-      Thickness: shape.config.strokeWidth,
+      ID: ID || undefined,
+      Config: {
+        BorderColor: shape.config.stroke,
+        Color: shape.config.fill,
+        IsEmpty: shape.config.fillEnabled || false,
+        OffsetX: shape.config.x,
+        OffsetY: shape.config.y,
+        Rotate: shape.config.rotation,
+        ScaleX: shape.config.scaleX,
+        ScaleY: shape.config.scaleY,
+        Thickness: shape.config.strokeWidth,
+      },
     });
   }
 

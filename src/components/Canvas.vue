@@ -18,7 +18,7 @@
                @mousedown="startDrawing($event)"
                @mousemove="draw($event)"
                @mouseup="stopDrawing($event)">
-        <v-layer>
+        <v-layer ref="layer">
           <template v-for="(shapeList, i) in [shapes, temporaryShape]">
             <template v-for="(shape, index) in shapeList">
               <component :is="shape.component"
@@ -79,6 +79,14 @@ export default {
     this.connection.on('newShape', (shapeType, shape) => {
       console.log('received new shape');
       this.shapes.push(this.convertJSONToShape(shapeType, shape));
+    });
+    this.connection.on('updateShape', (shapeType, shape) => {
+      console.log('shape updated');
+      const index = this.shapes.reduce((i1, s, i2) => (parseInt((s.config.name || '-').split('-')[1], 10) === shape.id ? i2 : i1), -1);
+      if (index !== -1) {
+        this.shapes[index] = this.convertJSONToShape(shapeType, shape);
+        this.$forceUpdate();
+      }
     });
   },
   data() {
@@ -143,7 +151,6 @@ export default {
           return;
         }
 
-        console.log('succeded sending');
         this.shapes.push(this.temporaryShape.pop(currentIndex));
         this.$forceUpdate();
       }
@@ -157,6 +164,7 @@ export default {
         this.shapes[index].config, event.target.attrs,
       );
       this.$forceUpdate();
+      this.sendUpdateShape(index).catch();
     },
     selectShape(e) {
       if (this.tool !== 'select') {
@@ -237,6 +245,7 @@ export default {
       this.shapes[index].config.scaleY = newConfig.scaleY;
       this.shapes[index].config.rotation = newConfig.rotation;
       this.$forceUpdate();
+      this.sendUpdateShape(index).catch();
     },
     updateLineTransformer() {
       if (this.$refs.lineTransformer) {
@@ -255,6 +264,7 @@ export default {
         return;
       }
       this.shapes[index].config.points = newConfig.points;
+      this.sendUpdateShape(index).catch();
     },
     updateNode({ param, value }) {
       if (!this.selectedNode) {
@@ -270,20 +280,30 @@ export default {
       this.selectedNode.attrs[param] = value;
       this.shapes[index].config[param] = value;
       this.selectedNode.getLayer().batchDraw();
+      this.sendUpdateShape(index).catch();
     },
     convertJSONToShape(shapeType, json) {
       switch (shapeType) {
         case 'Text':
           return this.tools.text.convertJSONToShape(json);
         case 'Line':
-          if (json.vertices.length === 2) {
-            return this.tools.line.convertJSONToShape(json);
-          }
+          return this.tools.line.convertJSONToShape(json);
+        case 'Pencil':
           return this.tools.freeLine.convertJSONToShape(json);
         case 'Circle':
           return this.tools.circle.convertJSONToShape(json);
         default:
           return 'error';
+      }
+    },
+    async sendUpdateShape(index) {
+      try {
+        const currentTool = this.tools[this.shapes[index].toolName];
+        const id = parseInt((this.shapes[index].config.name || '-').split('-')[1], 10);
+        await this.connection.invoke('UpdateShape', currentTool.getClass(), currentTool.convertShapeToJSON(this.shapes[index], id));
+      } catch (err) {
+        console.error(err.toString());
+        console.log('failed sending');
       }
     },
   },
