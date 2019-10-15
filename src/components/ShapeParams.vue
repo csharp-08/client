@@ -22,6 +22,7 @@
           </label>
         </template>
       </div>
+      <button v-on:click="deleteShape()">Supprimer la forme</button>
     </div>
   </div>
 </template>
@@ -104,6 +105,7 @@ export default {
         this.$emit('update-node', { param: p, value: this.params[p] });
       }
     },
+    deleteShape() { this.$emit('delete-shape'); },
   },
 };
 </script>

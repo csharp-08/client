@@ -11,6 +11,7 @@
     <ShapeParams v-if="selectedNode !== null"
                  :node="selectedNode"
                  @update-node="updateNode($event)"
+                 @delete-shape="deleteSelectedShape()"
                  :key="selectedNode.attrs.name"></ShapeParams>
     <div class="stage-container" :class="{ showParams: selectedNode !== null}">
       <v-stage :config="configKonva"
@@ -112,6 +113,18 @@ export default {
     this.connection.on('updateShape', (shapeType, shape) => {
       console.log('shape updated');
       this.shapes[shape.id] = this.convertJSONToShape(shapeType, shape);
+      this.$forceUpdate();
+    });
+    this.connection.on('deleteShape', (shapeType, id) => {
+      if (id === null) {
+        console.log('forbiden, no rights');
+        return;
+      }
+      if (!delete this.shapes[id]) {
+        console.log("failed to delete shape, it doesn't exist");
+        return;
+      }
+      console.log('deleted shape');
       this.$forceUpdate();
     });
   },
@@ -293,6 +306,26 @@ export default {
       this.shapes[id].config[param] = value;
       this.selectedNode.getLayer().batchDraw();
       this.sendUpdateShape(id).catch();
+    },
+    deleteSelectedShape() {
+      if (!this.selectedNode) {
+        return;
+      }
+      const newConfig = this.selectedNode.attrs;
+      const id = parseInt(newConfig.name.split('-')[1], 10) || null;
+      if (id === null) {
+        return;
+      }
+      this.deleteShape(id);
+    },
+    async deleteShape(id) {
+      try {
+        const currentTool = this.tools[this.shapes[id].toolName];
+        await this.connection.invoke('DeleteShape', currentTool.getClass(), currentTool.convertShapeToJSON(this.shapes[id], id));
+      } catch (err) {
+        console.error(err.toString());
+        console.log('failed deleting');
+      }
     },
     convertJSONToShape(shapeType, json) {
       switch (shapeType) {
