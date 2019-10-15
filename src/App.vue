@@ -39,7 +39,7 @@ export default {
     async start({ username, lobby }) {
       this.username = username;
       try {
-        let url = updateQueryStringParameter('https://localhost:5001/ws-server', 'username', username);
+        let url = updateQueryStringParameter('https://138.195.241.131:5001/ws-server', 'username', username);
         url = updateQueryStringParameter(url, 'lobby', lobby);
         this.connection = new HubConnectionBuilder().withUrl(url).build();
         await this.connection.start();

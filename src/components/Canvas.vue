@@ -19,15 +19,22 @@
                @mousemove="draw($event)"
                @mouseup="stopDrawing($event)">
         <v-layer ref="layer">
-          <template v-for="(shapeList, i) in [shapes, temporaryShape]">
-            <template v-for="(shape, index) in shapeList">
-              <component :is="shape.component"
-                        @dragmove="updateLineTransformer"
-                        @dragend="handleDragEnd($event, index)"
-                        :config="{ ...shape.config, draggable: tool === 'select'}"
-                        :key="`${i}_${index}_${tools[shape.toolName].getKey(shape)}`"></component>
-            </template>
+          <template v-for="(shape, index) in temporaryShape">
+            <component :is="shape.component"
+                       @dragmove="updateLineTransformer"
+                       @dragend="handleDragEnd($event, index)"
+                       :config="{ ...shape.config, draggable: tool === 'select'}"
+                       :key="`temp_${index}_${tools[shape.toolName].getKey(shape)}`"></component>
           </template>
+
+          <template v-for="(shape, shapeID) in shapes">
+            <component :is="shape.component"
+                       @dragmove="updateLineTransformer"
+                       @dragend="handleDragEnd($event, shapeID)"
+                       :config="{ ...shape.config, draggable: tool === 'select'}"
+                       :key="`shape_${shapeID}_${tools[shape.toolName].getKey(shape)}`"></component>
+          </template>
+
           <v-transformer ref="transformer"
                          @transformend="transformEnd()"
                          :rotationSnaps="[0, 90, 180, 270]"></v-transformer>
@@ -73,29 +80,13 @@ export default {
       default: () => ({}),
     },
   },
-  mounted() {
-    this.configKonva.width = this.$refs.container.clientWidth;
-    this.configKonva.height = this.$refs.container.clientHeight - 51;
-    this.connection.on('newShape', (shapeType, shape) => {
-      console.log('received new shape');
-      this.shapes.push(this.convertJSONToShape(shapeType, shape));
-    });
-    this.connection.on('updateShape', (shapeType, shape) => {
-      console.log('shape updated');
-      const index = this.shapes.reduce((i1, s, i2) => (parseInt((s.config.name || '-').split('-')[1], 10) === shape.id ? i2 : i1), -1);
-      if (index !== -1) {
-        this.shapes[index] = this.convertJSONToShape(shapeType, shape);
-        this.$forceUpdate();
-      }
-    });
-  },
   data() {
     return {
       configKonva: {
         width: 0,
         height: 0,
       },
-      shapes: [],
+      shapes: {},
       temporaryShape: [],
       isDrawing: false,
       toolParams: {},
@@ -109,6 +100,20 @@ export default {
       selectedLine: null,
       selectedNode: null,
     };
+  },
+  mounted() {
+    this.configKonva.width = this.$refs.container.clientWidth;
+    this.configKonva.height = this.$refs.container.clientHeight - 51;
+    this.connection.on('newShape', (shapeType, shape) => {
+      console.log('received new shape');
+      this.shapes[shape.id] = this.convertJSONToShape(shapeType, shape);
+      this.$forceUpdate();
+    });
+    this.connection.on('updateShape', (shapeType, shape) => {
+      console.log('shape updated');
+      this.shapes[shape.id] = this.convertJSONToShape(shapeType, shape);
+      this.$forceUpdate();
+    });
   },
   methods: {
     startDrawing(event) {
@@ -157,11 +162,10 @@ export default {
           this.$forceUpdate();
           return;
         }
-
         console.log('succeded sending');
         this.temporaryShape.some((value, index) => {
           if (value.id === idTempShape) {
-            this.shapes.push(this.temporaryShape.pop(index));
+            this.temporaryShape.pop(index);
             return true;
           }
           return false;
@@ -173,12 +177,12 @@ export default {
       this.tool = tool;
       this.toolParams = Object.assign(this.toolParams, params);
     },
-    handleDragEnd(event, index) {
-      this.shapes[index].config = this.tools[this.shapes[index].toolName].update(
-        this.shapes[index].config, event.target.attrs,
+    handleDragEnd(event, id) {
+      this.shapes[id].config = this.tools[this.shapes[id].toolName].update(
+        this.shapes[id].config, event.target.attrs,
       );
       this.$forceUpdate();
-      this.sendUpdateShape(index).catch();
+      this.sendUpdateShape(id).catch();
     },
     selectShape(e) {
       if (this.tool !== 'select') {
@@ -244,22 +248,20 @@ export default {
       }
 
       const newConfig = node.attrs;
-      const index = this.shapes.reduce(
-        (i, o, i2) => (o.config.name === newConfig.name ? i2 : i), null,
-      );
-      if (index === null) {
+      const id = parseInt(newConfig.name.split('-')[1], 10) || null;
+      if (id === null) {
         return;
       }
 
-      this.shapes[index].config = this.tools[this.shapes[index].toolName].update(
-        this.shapes[index].config, newConfig,
+      this.shapes[id].config = this.tools[this.shapes[id].toolName].update(
+        this.shapes[id].config, newConfig,
       );
 
-      this.shapes[index].config.scaleX = newConfig.scaleX;
-      this.shapes[index].config.scaleY = newConfig.scaleY;
-      this.shapes[index].config.rotation = newConfig.rotation;
+      this.shapes[id].config.scaleX = newConfig.scaleX;
+      this.shapes[id].config.scaleY = newConfig.scaleY;
+      this.shapes[id].config.rotation = newConfig.rotation;
       this.$forceUpdate();
-      this.sendUpdateShape(index).catch();
+      this.sendUpdateShape(id).catch();
     },
     updateLineTransformer() {
       if (this.$refs.lineTransformer) {
@@ -271,30 +273,26 @@ export default {
         return;
       }
       const newConfig = this.selectedLine.attrs;
-      const index = this.shapes.reduce(
-        (i, o, i2) => (o.config.name === newConfig.name ? i2 : i), null,
-      );
-      if (index === null) {
+      const id = parseInt(newConfig.name.split('-')[1], 10) || null;
+      if (id === null) {
         return;
       }
-      this.shapes[index].config.points = newConfig.points;
-      this.sendUpdateShape(index).catch();
+      this.shapes[id].config.points = newConfig.points;
+      this.sendUpdateShape(id).catch();
     },
     updateNode({ param, value }) {
       if (!this.selectedNode) {
         return;
       }
       const newConfig = this.selectedNode.attrs;
-      const index = this.shapes.reduce(
-        (i, o, i2) => (o.config.name === newConfig.name ? i2 : i), null,
-      );
-      if (index === null) {
+      const id = parseInt(newConfig.name.split('-')[1], 10) || null;
+      if (id === null) {
         return;
       }
       this.selectedNode.attrs[param] = value;
-      this.shapes[index].config[param] = value;
+      this.shapes[id].config[param] = value;
       this.selectedNode.getLayer().batchDraw();
-      this.sendUpdateShape(index).catch();
+      this.sendUpdateShape(id).catch();
     },
     convertJSONToShape(shapeType, json) {
       switch (shapeType) {
@@ -310,11 +308,10 @@ export default {
           return 'error';
       }
     },
-    async sendUpdateShape(index) {
+    async sendUpdateShape(id) {
       try {
-        const currentTool = this.tools[this.shapes[index].toolName];
-        const id = parseInt((this.shapes[index].config.name || '-').split('-')[1], 10);
-        await this.connection.invoke('UpdateShape', currentTool.getClass(), currentTool.convertShapeToJSON(this.shapes[index], id));
+        const currentTool = this.tools[this.shapes[id].toolName];
+        await this.connection.invoke('UpdateShape', currentTool.getClass(), currentTool.convertShapeToJSON(this.shapes[id], id));
       } catch (err) {
         console.error(err.toString());
         console.log('failed sending');
