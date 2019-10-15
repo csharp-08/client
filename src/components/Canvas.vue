@@ -106,6 +106,7 @@ export default {
     this.configKonva.height = this.$refs.container.clientHeight - 51;
     this.connection.on('newShape', (shapeType, shape) => {
       console.log('received new shape');
+      console.log(shape);
       this.shapes[shape.id] = this.convertJSONToShape(shapeType, shape);
       this.$forceUpdate();
     });
