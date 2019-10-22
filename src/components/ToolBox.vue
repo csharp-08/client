@@ -54,7 +54,13 @@
 
     <div class="toRight" :key="Object.keys(users).length">
       <div class="username">{{(users[id] || {}).Username}}</div>
-      <div>({{Object.keys(users).length}} personne(s) dans le salon)</div>
+      <div class="colors-container users">({{Object.keys(users).length}} personne(s) dans le salon)
+        <div class="colors users">
+          <h4 v-for="uid in others" :key="uid">
+            - {{users[uid].Username}}
+          </h4>
+        </div>
+      </div>
     </div>
 
     <div class="modal-wrapper" @click="showModal = false" v-if="showModal">
@@ -68,11 +74,11 @@
         <div class="content">
           <div>
             <ToggleButton :value="((users[id] || {}).OverridePermissions & 1) === 1" @change="updatePermission(false)"></ToggleButton>
-            <span style="margin-left: 0.4rem">Autoriser l'edition de tout mes objects</span>
+            <span style="margin-left: 0.4rem">Autoriser l'edition de tout mes objets</span>
           </div>
           <div style="margin-top: 0.8rem">
             <ToggleButton :value="((users[id] || {}).OverridePermissions >> 1) === 1" @change="updatePermission(true)"></ToggleButton>
-            <span style="margin-left: 0.4rem">Autoriser la suppression de tout mes objects</span>
+            <span style="margin-left: 0.4rem">Autoriser la suppression de tout mes objets</span>
           </div>
         </div>
       </div>
@@ -114,6 +120,11 @@ export default {
       text: '',
       showModal: false,
     };
+  },
+  computed: {
+    others() {
+      return Object.keys(this.users).filter(key => key !== this.id);
+    },
   },
   methods: {
     updateParam(param) {
@@ -272,5 +283,27 @@ export default {
     cursor: pointer;
     top: -2.5rem;
     right: -1rem;
+  }
+  .colors.users {
+    left: unset;
+    right: -0.5rem;
+    width: 100%;
+    box-shadow: unset;
+    padding: 0 0.5rem;
+    border-right: none;
+    display: none;
+    cursor: default;
+  }
+  .colors-container.users {
+    height: 50px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+  }
+  .colors-container.users:hover > .colors.users {
+    display: block;
+  }
+  .colors.users > h4 {
+    margin: 0.2rem 0;
   }
 </style>
