@@ -16,6 +16,16 @@ module.exports = {
         props: false,
       },
     ],
+    'no-bitwise': [
+      'error',
+      { allow: ['>>', '<<', '&'] },
+    ],
+    'max-len': [
+      'error',
+      {
+        code: 200,
+      },
+    ],
   },
   parserOptions: {
     parser: 'babel-eslint',

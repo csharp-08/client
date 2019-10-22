@@ -32,7 +32,7 @@
             <component :is="shape.component"
                        @dragmove="updateLineTransformer"
                        @dragend="handleDragEnd($event, shapeID)"
-                       :config="{ ...shape.config, draggable: tool === 'select'}"
+                       :config="{ ...shape.config, draggable: tool === 'select' && shape.config.canEdit}"
                        :key="`shape_${shapeID}_${tools[shape.toolName].getKey(shape)}`"></component>
           </template>
 
@@ -107,7 +107,13 @@ export default {
     this.configKonva.height = this.$refs.container.clientHeight - 51;
     this.connection.on('newShape', (shapeType, shape) => {
       console.log('received new shape');
-      this.shapes[shape.id] = this.convertJSONToShape(shapeType, shape);
+      const newShape = this.convertJSONToShape(shapeType, shape);
+      newShape.owner = shape.owner.connectionId;
+      newShape.overrideUserPolicy = shape.overrideUserPolicy || 0b00;
+      const owner = this.users[newShape.owner] || { OverridePermissions: 0b00 };
+      newShape.config.canEdit = newShape.owner === this.id || ((owner.OverridePermissions & 1) !== (newShape.overrideUserPolicy & 1));
+      newShape.config.canDelete = newShape.owner === this.id || ((owner.OverridePermissions >> 1) !== (newShape.overrideUserPolicy >> 1));
+      this.shapes[shape.id] = newShape;
       this.$forceUpdate();
     });
     this.connection.on('updateShape', (shapeType, shape) => {
@@ -221,9 +227,17 @@ export default {
       const stage = transformerNode.getStage();
 
       const selectedNode = stage.findOne(`.${nodeName}`);
+      console.log(selectedNode);
+      if (!selectedNode || (selectedNode && selectedNode.attrs && selectedNode.attrs.canEdit !== undefined && !selectedNode.attrs.canEdit)) {
+        this.selectedLine = null;
+        this.selectedNode = null;
+        transformerNode.detach();
+        transformerNode.getLayer().batchDraw();
+        return;
+      }
+
       // do nothing if selected node is already attached
       if (selectedNode === transformerNode.node()) {
-        this.selectedNode = null;
         this.selectedLine = null;
         return;
       }
@@ -342,6 +356,7 @@ export default {
       }
     },
     async sendUpdateShape(id) {
+      console.log(id);
       try {
         const currentTool = this.tools[this.shapes[id].toolName];
         await this.connection.invoke('UpdateShape', currentTool.getClass(), currentTool.convertShapeToJSON(this.shapes[id], id));
