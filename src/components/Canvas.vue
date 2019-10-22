@@ -106,7 +106,6 @@ export default {
     this.configKonva.width = this.$refs.container.clientWidth;
     this.configKonva.height = this.$refs.container.clientHeight - 51;
     this.connection.on('newShape', (shapeType, shape) => {
-      console.log('received new shape');
       const newShape = this.convertJSONToShape(shapeType, shape);
       newShape.owner = shape.owner.connectionId;
       newShape.overrideUserPolicy = shape.overrideUserPolicy || 0b00;
@@ -117,9 +116,18 @@ export default {
       this.$forceUpdate();
     });
     this.connection.on('updateShape', (shapeType, shape) => {
-      console.log('shape updated');
-      this.shapes[shape.id] = this.convertJSONToShape(shapeType, shape);
-      this.$forceUpdate();
+      if (shapeType === null) {
+        console.log('THERE IS A BACKEND PROBLEM. ASK MAYEUL');
+      } else {
+        const newShape = this.convertJSONToShape(shapeType, shape);
+        newShape.owner = shape.owner.connectionId;
+        newShape.overrideUserPolicy = shape.overrideUserPolicy || 0b00;
+        const owner = this.users[newShape.owner] || { OverridePermissions: 0b00 };
+        newShape.config.canEdit = newShape.owner === this.id || ((owner.OverridePermissions & 1) !== (newShape.overrideUserPolicy & 1));
+        newShape.config.canDelete = newShape.owner === this.id || ((owner.OverridePermissions >> 1) !== (newShape.overrideUserPolicy >> 1));
+        this.shapes[shape.id] = newShape;
+        this.$forceUpdate();
+      }
     });
     this.connection.on('deleteShape', (shapeType, id) => {
       if (id === null) {
