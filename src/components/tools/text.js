@@ -108,8 +108,8 @@ class Text extends Tool {
   }
 
   // eslint-disable-next-line
-  getClass() {
-    return 'Text';
+  getShapeType() {
+    return '4';
   }
 }
 

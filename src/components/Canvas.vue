@@ -175,7 +175,7 @@ export default {
         this.isDrawing = false;
 
         try {
-          await this.connection.invoke('AddShape', currentTool.getClass(), currentTool.convertShapeToJSON(newShape));
+          await this.connection.invoke('AddShape', currentTool.getShapeType(), currentTool.convertShapeToJSON(newShape));
         } catch (err) {
           console.error(err.toString());
           console.log('failed sending');
@@ -343,23 +343,25 @@ export default {
     async deleteShape(id) {
       try {
         const currentTool = this.tools[this.shapes[id].toolName];
-        await this.connection.invoke('DeleteShape', currentTool.getClass(), currentTool.convertShapeToJSON(this.shapes[id], id));
+        await this.connection.invoke('DeleteShape', currentTool.getShapeType(), currentTool.convertShapeToJSON(this.shapes[id], id));
       } catch (err) {
         console.error(err.toString());
         console.log('failed deleting');
       }
     },
     convertJSONToShape(shapeType, json) {
-      switch (shapeType) {
-        case 'Text':
+      switch (shapeType.toString()) {
+        case this.tools.text.getShapeType():
           return this.tools.text.convertJSONToShape(json);
-        case 'Line':
+        case this.tools.line.getShapeType():
           return this.tools.line.convertJSONToShape(json);
-        case 'Pencil':
+        case this.tools.freeLine.getShapeType():
           return this.tools.freeLine.convertJSONToShape(json);
-        case 'Circle':
+        case this.tools.circle.getShapeType():
           return this.tools.circle.convertJSONToShape(json);
         default:
+          console.log(shapeType);
+          console.log(this.tools.text.getShapeType());
           return 'error';
       }
     },
@@ -367,7 +369,7 @@ export default {
       console.log(id);
       try {
         const currentTool = this.tools[this.shapes[id].toolName];
-        await this.connection.invoke('UpdateShape', currentTool.getClass(), currentTool.convertShapeToJSON(this.shapes[id], id));
+        await this.connection.invoke('UpdateShape', currentTool.getShapeType(), currentTool.convertShapeToJSON(this.shapes[id], id));
       } catch (err) {
         console.error(err.toString());
         console.log('failed sending');

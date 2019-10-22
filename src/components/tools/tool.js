@@ -43,7 +43,7 @@ class Tool {
   }
 
   // eslint-disable-next-line
-  getClass() {
+  getShapeType() {
     throw new Error('You must implement this function');
   }
 }

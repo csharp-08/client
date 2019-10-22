@@ -109,8 +109,8 @@ class Cirle extends Tool {
   }
 
   // eslint-disable-next-line
-  getClass() {
-    return 'Circle';
+  getShapeType() {
+    return '3';
   }
 }
 

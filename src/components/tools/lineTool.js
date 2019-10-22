@@ -118,8 +118,8 @@ class LineTool extends Tool {
   }
 
   // eslint-disable-next-line
-  getClass() {
-    return 'Line';
+  getShapeType() {
+    return '1';
   }
 }
 

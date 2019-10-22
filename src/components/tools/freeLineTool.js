@@ -110,8 +110,8 @@ class FreeLineTool extends Tool {
   }
 
   // eslint-disable-next-line
-  getClass() {
-    return 'Pencil';
+  getShapeType() {
+    return '2';
   }
 }
 
