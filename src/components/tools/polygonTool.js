@@ -1,6 +1,6 @@
 import Tool from './tool';
 
-class FreeLineTool extends Tool {
+class PolygonTool extends Tool {
   constructor() {
     super();
 
@@ -10,6 +10,7 @@ class FreeLineTool extends Tool {
       strokeWidth: 10,
     };
     this.count = 0;
+    this.sensivity = 150;
   }
 
   startDrawing(event, params) {
@@ -19,7 +20,7 @@ class FreeLineTool extends Tool {
     this.count += 1;
     return {
       component: this.shapeName,
-      toolName: 'freeLine',
+      toolName: 'polygon',
       config: {
         points: [event.evt.offsetX, event.evt.offsetY, event.evt.offsetX, event.evt.offsetY],
         stroke: params.color || this.defaultParams.color,
@@ -28,9 +29,13 @@ class FreeLineTool extends Tool {
         lineJoin: 'round',
         x: 0,
         y: 0,
-        name: `freeline-${this.count}`,
+        name: `polygon-${this.count}`,
       },
     };
+  }
+
+  capturePoint(event, newShape) {
+    return this.distance(event.evt.offsetX, event.evt.offsetY, newShape.config.points[0], newShape.config.points[1]) > this.sensivity;
   }
 
   // eslint-disable-next-line
@@ -38,17 +43,45 @@ class FreeLineTool extends Tool {
     if (!event || !event.evt) {
       return;
     }
-    newShape.config.points.push(event.evt.offsetX, event.evt.offsetY);
+
+    if (this.capturePoint(event, newShape)) {
+      newShape.config.points[newShape.config.points.length - 2] = event.evt.offsetX;
+      newShape.config.points[newShape.config.points.length - 1] = event.evt.offsetY;
+    } else {
+      // eslint-disable-next-line prefer-destructuring
+      newShape.config.points[newShape.config.points.length - 2] = newShape.config.points[0];
+      // eslint-disable-next-line prefer-destructuring
+      newShape.config.points[newShape.config.points.length - 1] = newShape.config.points[1];
+    }
   }
 
   // eslint-disable-next-line
   stopDrawing(event, newShape) {
+    if (!event || !event.evt) {
+      return true;
+    }
+
+    if (this.capturePoint(event, newShape)) {
+      newShape.config.points.push(event.evt.offsetX);
+      newShape.config.points.push(event.evt.offsetY);
+      return false;
+    }
+
+    newShape.config.points.push(newShape.config.points[0]);
+    newShape.config.points.push(newShape.config.points[1]);
     return true;
   }
 
   // eslint-disable-next-line
+  distance(x1,y1,x2,y2) {
+    const x = x1 - x2;
+    const y = y1 - y2;
+    return x * x + y * y;
+  }
+
+  // eslint-disable-next-line
   getKey(shape) {
-    return shape.config.points.length;
+    return shape.config.points.reduce((sum, p) => sum + p, 0);
   }
 
   // eslint-disable-next-line
@@ -60,6 +93,7 @@ class FreeLineTool extends Tool {
 
   // eslint-disable-next-line
   convertShapeToJSON(shape, ID = null) {
+
     const points = [];
     let previous = 0;
 
@@ -92,12 +126,10 @@ class FreeLineTool extends Tool {
   convertJSONToShape(json) {
     return {
       component: 'v-Line',
-      toolName: 'freeLine',
+      toolName: 'line',
       config: {
+        name: `line-${json.id}`,
         points: json.vertices.flatMap(x => [x.item1, x.item2]),
-        lineCap: 'round',
-        lineJoin: 'round',
-        name: `freeline-${json.id}`,
         stroke: json.config.borderColor,
         strokeWidth: json.config.thickness,
         fill: json.config.color,
@@ -107,14 +139,16 @@ class FreeLineTool extends Tool {
         rotation: json.config.rotate || 0,
         scaleX: json.config.scaleX || 1,
         scaleY: json.config.scaleY || 1,
+        lineCap: 'round',
+        lineJoin: 'round',
       },
     };
   }
 
   // eslint-disable-next-line
   getShapeType() {
-    return 2;
+    return 5;
   }
 }
 
-export default FreeLineTool;
+export default PolygonTool;

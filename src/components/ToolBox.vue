@@ -12,6 +12,9 @@
     <button @click="setTool('circle')" :class="{ active: tool === 'circle' }">
       <font-awesome-icon icon="circle" />
     </button>
+    <button @click="setTool('polygon')" :class="{ active: tool === 'polygon' }">
+      <font-awesome-icon icon="draw-polygon" />
+    </button>
     <button class="colors-container"
             @click.stop="setTool('text'); showText = !showText;"
             :class="{ active: tool === 'text' }">

@@ -45,10 +45,11 @@ class LineTool extends Tool {
   // eslint-disable-next-line
   stopDrawing(event, newShape) {
     if (!event || !event.evt) {
-      return;
+      return true;
     }
     newShape.config.points[2] = event.evt.offsetX;
     newShape.config.points[3] = event.evt.offsetY;
+    return true;
   }
 
   // eslint-disable-next-line
@@ -119,7 +120,7 @@ class LineTool extends Tool {
 
   // eslint-disable-next-line
   getShapeType() {
-    return '1';
+    return 1;
   }
 }
 

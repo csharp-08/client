@@ -109,7 +109,7 @@ class Text extends Tool {
 
   // eslint-disable-next-line
   getShapeType() {
-    return '4';
+    return 4;
   }
 }
 

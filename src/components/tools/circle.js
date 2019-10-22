@@ -48,7 +48,9 @@ class Cirle extends Tool {
   }
 
   // eslint-disable-next-line
-  stopDrawing(event, newShape) {}
+  stopDrawing(event, newShape) {
+    return true;
+  }
 
   // eslint-disable-next-line
   getKey(shape) {
@@ -110,7 +112,7 @@ class Cirle extends Tool {
 
   // eslint-disable-next-line
   getShapeType() {
-    return '3';
+    return 3;
   }
 }
 

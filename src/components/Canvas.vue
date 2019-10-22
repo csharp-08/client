@@ -64,6 +64,7 @@ import FreeLineTool from './tools/freeLineTool';
 import CircleTool from './tools/circle';
 import TextTool from './tools/text';
 import LineTool from './tools/lineTool';
+import PolygonTool from './tools/polygonTool';
 
 export default {
   name: 'Canvas',
@@ -102,6 +103,7 @@ export default {
         circle: new CircleTool(),
         text: new TextTool(),
         line: new LineTool(),
+        polygon: new PolygonTool(),
       },
       selectedLine: null,
       selectedNode: null,
@@ -184,6 +186,11 @@ export default {
       if (this.$refs.toolbox) {
         this.$refs.toolbox.closeTools();
       }
+      if (this.isDrawing) {
+        // Special case where a drawing needs to clic several times
+        this.stopDrawing(event);
+        return;
+      }
       if (Object.keys(this.tools).includes(this.tool)) {
         const newShape = this.tools[this.tool].startDrawing(event, this.toolParams);
         if (newShape !== null) {
@@ -208,14 +215,25 @@ export default {
         const currentIndex = this.temporaryShape.length - 1;
         const newShape = this.temporaryShape[currentIndex] || null;
         const idTempShape = newShape.id;
-        currentTool.stopDrawing(event, newShape);
-        this.isDrawing = false;
-
-        try {
-          await this.connection.invoke('AddShape', currentTool.getShapeType(), currentTool.convertShapeToJSON(newShape));
-        } catch (err) {
-          console.error(err.toString());
-          console.log('failed sending');
+        if (currentTool.stopDrawing(event, newShape)) {
+          console.log('stop');
+          this.isDrawing = false;
+          try {
+            await this.connection.invoke('AddShape', currentTool.getShapeType().toString(), currentTool.convertShapeToJSON(newShape));
+          } catch (err) {
+            console.error(err.toString());
+            console.log('failed sending');
+            this.temporaryShape.some((value, index) => {
+              if (value.id === idTempShape) {
+                this.temporaryShape.pop(index);
+                return true;
+              }
+              return false;
+            });
+            this.$forceUpdate();
+            return;
+          }
+          console.log('succeded sending');
           this.temporaryShape.some((value, index) => {
             if (value.id === idTempShape) {
               this.temporaryShape.pop(index);
@@ -224,16 +242,8 @@ export default {
             return false;
           });
           this.$forceUpdate();
-          return;
         }
-        this.temporaryShape.some((value, index) => {
-          if (value.id === idTempShape) {
-            this.temporaryShape.pop(index);
-            return true;
-          }
-          return false;
-        });
-        this.$forceUpdate();
+        
       }
     },
     setTool({ tool, params }) {
@@ -384,7 +394,7 @@ export default {
       }
     },
     convertJSONToShape(shapeType, json) {
-      switch (shapeType.toString()) {
+      switch (parseInt(shapeType, 10)) {
         case this.tools.text.getShapeType():
           return this.tools.text.convertJSONToShape(json);
         case this.tools.line.getShapeType():
@@ -393,6 +403,8 @@ export default {
           return this.tools.freeLine.convertJSONToShape(json);
         case this.tools.circle.getShapeType():
           return this.tools.circle.convertJSONToShape(json);
+        case this.tools.polygon.getShapeType():
+          return this.tools.polygon.convertJSONToShape(json);
         default:
           console.log(shapeType);
           console.log(this.tools.text.getShapeType());
@@ -402,7 +414,7 @@ export default {
     async sendUpdateShape(id) {
       try {
         const currentTool = this.tools[this.shapes[id].toolName];
-        await this.connection.invoke('UpdateShape', currentTool.getShapeType(), currentTool.convertShapeToJSON(this.shapes[id], id));
+        await this.connection.invoke('UpdateShape', currentTool.getShapeType().toString(), currentTool.convertShapeToJSON(this.shapes[id], id));
       } catch (err) {
         console.error(err.toString());
         console.log('failed sending');
