@@ -18,7 +18,7 @@ module.exports = {
     ],
     'no-bitwise': [
       'error',
-      { allow: ['>>', '<<', '&'] },
+      { allow: ['>>', '<<', '&', '^'] },
     ],
     'max-len': [
       'error',

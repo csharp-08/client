@@ -22,7 +22,31 @@
           </label>
         </template>
       </div>
-      <button v-on:click="deleteShape()">Supprimer la forme</button>
+      <div class="divider"></div>
+      <div class="input-field" v-if="(node.attrs || {}).isOwner">
+        <label style="color: white;">Autoriser l'edition</label>
+        <input id="can-move-toggle"
+               type="checkbox"
+               :checked="value[shapeID].overrideUserPolicy & 1"
+               @change="updatePermission(false)"
+               class="noFlex"/>
+        <label for="can-move-toggle" style="flex: 1; color: white; cursor: pointer;">
+          {{value[shapeID].overrideUserPolicy & 1 ? 'oui' : 'non'}}
+        </label>
+      </div>
+      <div class="input-field" v-if="(node.attrs || {}).isOwner">
+        <label style="color: white;">Autoriser la suppression</label>
+        <input id="can-delete-toggle"
+               type="checkbox"
+               :checked="value[shapeID].overrideUserPolicy >> 1"
+               @change="updatePermission(true)"
+               class="noFlex"/>
+        <label for="can-delete-toggle" style="flex: 1; color: white; cursor: pointer;">
+          {{value[shapeID].overrideUserPolicy >> 1 ? 'oui' : 'non'}}
+        </label>
+      </div>
+      <div class="divider"></div>
+      <button v-on:click="deleteShape()" v-if="(node.attrs || { canDelete: false }).canDelete">Supprimer la forme</button>
     </div>
   </div>
 </template>
@@ -34,6 +58,10 @@ export default {
   name: 'ShapeParams',
   props: {
     node: {
+      type: Object,
+      default: () => ({}),
+    },
+    value: {
       type: Object,
       default: () => ({}),
     },
@@ -52,6 +80,9 @@ export default {
         }
         return props;
       }, {});
+    },
+    shapeID() {
+      return parseInt(((this.node.attrs || {}).name || '').split('-')[1], 10);
     },
   },
   data() {
@@ -106,6 +137,17 @@ export default {
       }
     },
     deleteShape() { this.$emit('delete-shape'); },
+    updatePermission(forDelete) {
+      const s = this.value[this.shapeID];
+      if (!s) {
+        return;
+      }
+      if (forDelete) {
+        this.$emit('permission-shape', { id: this.shapeID, permission: s.overrideUserPolicy ^ 0b10 });
+      } else {
+        this.$emit('permission-shape', { id: this.shapeID, permission: s.overrideUserPolicy ^ 0b01 });
+      }
+    },
   },
 };
 </script>

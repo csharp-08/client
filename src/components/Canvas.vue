@@ -6,13 +6,18 @@
               :params="toolParams"
               :id="id"
               :users="users"
+              @update-permission="updateUserPermission($event)"
               ref="toolbox"
     ></tool-box>
     <ShapeParams v-if="selectedNode !== null"
                  :node="selectedNode"
+                 v-model="shapes"
                  @update-node="updateNode($event)"
                  @delete-shape="deleteSelectedShape()"
-                 :key="selectedNode.attrs.name"></ShapeParams>
+                 @permission-shape="updateShapePermission($event)"
+                 :key="`${selectedNode.attrs.name}_${paramsUpdateFix}`"
+                 ref="shapeParams"
+    ></ShapeParams>
     <div class="stage-container" :class="{ showParams: selectedNode !== null}">
       <v-stage :config="configKonva"
                @click="selectShape"
@@ -100,6 +105,7 @@ export default {
       },
       selectedLine: null,
       selectedNode: null,
+      paramsUpdateFix: 0,
     };
   },
   mounted() {
@@ -112,12 +118,13 @@ export default {
       const owner = this.users[newShape.owner] || { OverridePermissions: 0b00 };
       newShape.config.canEdit = newShape.owner === this.id || ((owner.OverridePermissions & 1) !== (newShape.overrideUserPolicy & 1));
       newShape.config.canDelete = newShape.owner === this.id || ((owner.OverridePermissions >> 1) !== (newShape.overrideUserPolicy >> 1));
+      newShape.config.isOwner = newShape.owner === this.id;
       this.shapes[shape.id] = newShape;
       this.$forceUpdate();
     });
     this.connection.on('updateShape', (shapeType, shape) => {
       if (shapeType === null) {
-        console.log('THERE IS A BACKEND PROBLEM. ASK MAYEUL');
+        console.log('PERMISSION DENIED');
       } else {
         const newShape = this.convertJSONToShape(shapeType, shape);
         newShape.owner = shape.owner.connectionId;
@@ -125,20 +132,50 @@ export default {
         const owner = this.users[newShape.owner] || { OverridePermissions: 0b00 };
         newShape.config.canEdit = newShape.owner === this.id || ((owner.OverridePermissions & 1) !== (newShape.overrideUserPolicy & 1));
         newShape.config.canDelete = newShape.owner === this.id || ((owner.OverridePermissions >> 1) !== (newShape.overrideUserPolicy >> 1));
+        newShape.config.isOwner = newShape.owner === this.id;
         this.shapes[shape.id] = newShape;
         this.$forceUpdate();
       }
     });
-    this.connection.on('deleteShape', (shapeType, id) => {
+    this.connection.on('deleteShape', (id) => {
       if (id === null) {
-        console.log('forbiden, no rights');
+        console.log('PERMISSION DENIED');
         return;
+      }
+      if (this.selectedNode !== null) {
+        const selectedId = parseInt((this.selectedNode.attrs || {}).name.split('-')[1], 10) || null;
+        if (selectedId === id) {
+          this.updateTransformer('');
+        }
       }
       if (!delete this.shapes[id]) {
-        console.log("failed to delete shape, it doesn't exist");
+        console.log("Failed to delete shape, it doesn't exist");
         return;
       }
-      console.log('deleted shape');
+      this.$forceUpdate();
+    });
+    this.connection.on('newShapePermission', (id, permission) => {
+      const shape = this.shapes[id] || null;
+      if (shape === null) {
+        console.log('Shape not found !');
+        return;
+      }
+      shape.overrideUserPolicy = parseInt(permission, 10);
+      const owner = this.users[shape.owner] || { OverridePermissions: 0b00 };
+      shape.config.canEdit = shape.owner === this.id || ((owner.OverridePermissions & 1) !== (shape.overrideUserPolicy & 1));
+      shape.config.canDelete = shape.owner === this.id || ((owner.OverridePermissions >> 1) !== (shape.overrideUserPolicy >> 1));
+      shape.config.isOwner = shape.owner === this.id;
+      this.paramsUpdateFix += 1;
+      this.$forceUpdate();
+    });
+    this.connection.on('newUserPermission', (id, permission) => {
+      this.users[id].OverridePermissions = parseInt(permission, 10); // eslint-disable-next-line
+      for (const shapeID of Object.keys(this.shapes)) {
+        const shape = this.shapes[shapeID];
+        const owner = this.users[shape.owner] || { OverridePermissions: 0b00 };
+        shape.config.canEdit = shape.owner === this.id || ((owner.OverridePermissions & 1) !== (shape.overrideUserPolicy & 1));
+        shape.config.canDelete = shape.owner === this.id || ((owner.OverridePermissions >> 1) !== (shape.overrideUserPolicy >> 1));
+      }
       this.$forceUpdate();
     });
   },
@@ -189,7 +226,6 @@ export default {
           this.$forceUpdate();
           return;
         }
-        console.log('succeded sending');
         this.temporaryShape.some((value, index) => {
           if (value.id === idTempShape) {
             this.temporaryShape.pop(index);
@@ -235,7 +271,6 @@ export default {
       const stage = transformerNode.getStage();
 
       const selectedNode = stage.findOne(`.${nodeName}`);
-      console.log(selectedNode);
       if (!selectedNode || (selectedNode && selectedNode.attrs && selectedNode.attrs.canEdit !== undefined && !selectedNode.attrs.canEdit)) {
         this.selectedLine = null;
         this.selectedNode = null;
@@ -342,8 +377,7 @@ export default {
     },
     async deleteShape(id) {
       try {
-        const currentTool = this.tools[this.shapes[id].toolName];
-        await this.connection.invoke('DeleteShape', currentTool.getShapeType(), currentTool.convertShapeToJSON(this.shapes[id], id));
+        await this.connection.invoke('DeleteShape', id);
       } catch (err) {
         console.error(err.toString());
         console.log('failed deleting');
@@ -366,10 +400,25 @@ export default {
       }
     },
     async sendUpdateShape(id) {
-      console.log(id);
       try {
         const currentTool = this.tools[this.shapes[id].toolName];
         await this.connection.invoke('UpdateShape', currentTool.getShapeType(), currentTool.convertShapeToJSON(this.shapes[id], id));
+      } catch (err) {
+        console.error(err.toString());
+        console.log('failed sending');
+      }
+    },
+    async updateShapePermission({ id, permission }) {
+      try {
+        await this.connection.invoke('UpdateShapePermission', id, permission);
+      } catch (err) {
+        console.error(err.toString());
+        console.log('failed sending');
+      }
+    },
+    async updateUserPermission({ p }) {
+      try {
+        await this.connection.invoke('UpdateUserPermission', p);
       } catch (err) {
         console.error(err.toString());
         console.log('failed sending');

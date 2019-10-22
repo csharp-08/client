@@ -47,10 +47,35 @@
                min="3" max="100" value="15" class="slider" id="myRange">
       </div>
     </button>
+    <div class="divider"></div>
+    <button @click="showModal = true">
+      <font-awesome-icon icon="cogs" />
+    </button>
 
     <div class="toRight" :key="Object.keys(users).length">
       <div class="username">{{(users[id] || {}).Username}}</div>
       <div>({{Object.keys(users).length}} personne(s) dans le salon)</div>
+    </div>
+
+    <div class="modal-wrapper" @click="showModal = false" v-if="showModal">
+      <div class="modal" @click.stop>
+        <div class="modal-header">
+          <h2>Parametres :</h2>
+          <div class="close-icon" @click="showModal = false">
+            <font-awesome-icon icon="times" />
+          </div>
+        </div>
+        <div class="content">
+          <div>
+            <ToggleButton :value="((users[id] || {}).OverridePermissions & 1) === 1" @change="updatePermission(false)"></ToggleButton>
+            <span style="margin-left: 0.4rem">Autoriser l'edition de tout mes objects</span>
+          </div>
+          <div style="margin-top: 0.8rem">
+            <ToggleButton :value="((users[id] || {}).OverridePermissions >> 1) === 1" @change="updatePermission(true)"></ToggleButton>
+            <span style="margin-left: 0.4rem">Autoriser la suppression de tout mes objects</span>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -87,6 +112,7 @@ export default {
         'black', 'red', 'blue', 'green', 'yellow', 'white',
       ],
       text: '',
+      showModal: false,
     };
   },
   methods: {
@@ -105,6 +131,17 @@ export default {
       this.showStroke = false;
       this.showText = false;
     },
+    updatePermission(forDelete) {
+      const u = this.users[this.id];
+      if (!u) {
+        return;
+      }
+      if (forDelete) {
+        this.$emit('update-permission', { p: u.OverridePermissions ^ 0b10 });
+      } else {
+        this.$emit('update-permission', { p: u.OverridePermissions ^ 0b01 });
+      }
+    },
   },
 };
 </script>
@@ -115,6 +152,7 @@ export default {
     border-bottom: 1px solid #7c7c7c;
     box-shadow: 1px 2px 4px rgba(0, 0, 0, .5);
     display: flex;
+    align-items: center;
   }
   button {
     height: 50px;
@@ -199,5 +237,40 @@ export default {
     padding: 0.6rem 1.2rem;
     margin: 0 1rem;
     font-weight: bold;
+  }
+  .modal-wrapper {
+    position: absolute;
+    z-index: 20;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.2);
+  }
+  .modal {
+    border: 1px solid rgba(0, 0, 0, 0.5);
+    border-radius: 5px;
+    width: 480px;
+    height: auto;
+    background-color: white;
+  }
+  .modal > div {
+    padding: 0 1rem;
+  }
+  .modal > .modal-header {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.5);
+    position: relative;
+  }
+  .modal > .content {
+    padding: 2rem 1rem;
+  }
+  .close-icon {
+    position: absolute;
+    cursor: pointer;
+    top: -2.5rem;
+    right: -1rem;
   }
 </style>
