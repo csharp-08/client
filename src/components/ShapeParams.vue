@@ -7,10 +7,28 @@
     <div class="content">
       <div v-for="(object, p) in filteredProperties" :key="p" class="input-field">
         <label style="color: white;">{{object.text}}</label>
+        <verte model="hex"
+               :id="p"
+               class="params-color"
+               picker="square"
+               v-model="properties[p].color"
+               :showHistory="false"
+               :colorHistory="null"
+               :draggable="false"
+               :enableAlpha="false"
+               v-if="object.type === 1"
+               ref="verte"
+        >
+          <span :style="{ color: properties[p].color || '#000000', fill: properties[p].color || '#000000' }">
+            <svg viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="50"/>
+            </svg>
+          </span>
+        </verte>
         <input v-model="params[p]"
-               :type="object.type === 1 ? 'text' : 'number'"
+               type="number"
                @input="updateNode(p)"
-               v-if="object.type > 0"/>
+               v-else-if="object.type > 0"/>
         <template v-else>
           <input :id="p"
                  v-model="params[p]"
@@ -52,10 +70,14 @@
 </template>
 
 <script>
+import Verte from 'verte';
 // 0 -> boolean, 1 -> color, 2 -> number, 3 -> number (0 - 1), 4 -> number (0 - 360)
 
 export default {
   name: 'ShapeParams',
+  components: {
+    Verte,
+  },
   props: {
     node: {
       type: Object,
@@ -68,6 +90,13 @@ export default {
   },
   beforeMount() {
     this.updateData();
+  },
+  mounted() {
+    const { attrs } = this.node;
+    this.properties.fill.color = attrs.fill || '';
+    this.properties.stroke.color = attrs.stroke || '';
+    this.addColorPickerButtons('fill');
+    this.addColorPickerButtons('stroke');
   },
   computed: {
     shapeName() {
@@ -92,6 +121,7 @@ export default {
           type: 1,
           text: 'Remplissage',
           shapes: ['circle', 'text'],
+          color: '',
         },
         fillEnabled: {
           type: 0,
@@ -102,6 +132,7 @@ export default {
           type: 1,
           text: 'Couleur du trait',
           shapes: ['circle', 'line', 'freeline', 'text'],
+          color: '',
         },
         strokeWidth: {
           type: 2,
@@ -146,6 +177,26 @@ export default {
         this.$emit('permission-shape', { id: this.shapeID, permission: s.overrideUserPolicy ^ 0b10 });
       } else {
         this.$emit('permission-shape', { id: this.shapeID, permission: s.overrideUserPolicy ^ 0b01 });
+      }
+    },
+    addColorPickerButtons(p) {
+      const $el = document.getElementById(p);
+      if ($el !== null) {
+        const $parent = $el.children[1].children[0];
+        const $newChild = document.createElement('div');
+        $newChild.innerHTML = `<div class="verte__inputs"><button type="button" class="verte__model" id="${p}_exit">
+Annuler</button><button type="button" class="verte__model" id="${p}_ok">Ok</button></div>`;
+        $newChild.className = 'verte__controller new';
+        $parent.appendChild($newChild);
+        document.getElementById(`${p}_exit`).addEventListener('click', () => {
+          this.properties[p].color = this.params[p];
+          $el.children[0].click();
+        });
+        document.getElementById(`${p}_ok`).addEventListener('click', () => {
+          this.params[p] = this.properties[p].color;
+          this.updateNode(p);
+          $el.children[0].click();
+        });
       }
     },
   },
@@ -196,5 +247,20 @@ input.noFlex {
   margin-right: 0.2rem;
   margin-left: 0.5rem;
   cursor: pointer;
+}
+</style>
+
+<style>
+.verte__controller.new button {
+  font-size: 1rem;
+  justify-content: flex-end;
+}
+.verte__controller.new button:last-child {
+  flex: 1;
+}
+.params-color .verte__guide {
+  height: 25px;
+  width: 25px;
+  background-color: transparent;
 }
 </style>

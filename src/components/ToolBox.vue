@@ -29,16 +29,15 @@
       </div>
     </button>
     <div class="divider"></div>
-    <button :style="{ color }" @click.stop="showColors = !showColors" class="colors-container">
+    <verte model="hex"
+           :value="color"
+           :showHistory="false"
+           :colorHistory="null"
+           :enableAlpha="false"
+           :draggable="false"
+           @input="updateParam({ color: $event })">
       <font-awesome-icon icon="palette" />
-      <div v-show="showColors" class="colors" @click.stop>
-        <button v-for="c in colors"
-                :key="c"
-                :style="{ color: c, backgroundColor: c }"
-                @click="updateParam({ color: c })">
-        </button>
-      </div>
-    </button>
+    </verte>
     <button class="colors-container" @click.stop="showStroke = !showStroke">
       <span style="font-size: 0.6rem"><font-awesome-icon icon="circle" /></span>
       <span style="font-size: 1rem"><font-awesome-icon icon="circle" /></span>
@@ -90,6 +89,9 @@
 </template>
 
 <script>
+import Verte from 'verte';
+import 'verte/dist/verte.css';
+
 const colors = [
   'rgba(103, 0, 137, 0.55)',
   'rgba(137, 0, 38, 0.55)',
@@ -106,6 +108,9 @@ const colors = [
 
 export default {
   name: 'Toolbox',
+  components: {
+    Verte,
+  },
   props: {
     tool: {
       type: String,
@@ -327,4 +332,30 @@ export default {
   .colors.users > h4 {
     margin: 0.2rem 0;
   }
+</style>
+<style>
+.verte__guide {
+  height: 50px;
+  min-width: 50px;
+  background-color: white;
+  outline: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.3rem;
+  color: rgb(76, 76, 76);
+}
+.verte__guide:hover {
+  background-color: #d1d1d1;
+}
+.verte__close {
+  display: none;
+}
+.verte__guide {
+  height: 50px;
+}
+.verte__menu {
+  transform: translate(0px, 20px)!important;
+  border: 1px solid #7c7c7c;
+  overflow: hidden;
+}
 </style>

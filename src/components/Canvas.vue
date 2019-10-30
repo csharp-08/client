@@ -66,6 +66,13 @@ import TextTool from './tools/text';
 import LineTool from './tools/lineTool';
 import PolygonTool from './tools/polygonTool';
 
+function intToHex(n) {
+  return (`00${Number(n).toString(16)}`).slice(-2);
+}
+function rgbToHex(rgb) {
+  return `#${rgb.split(',').map(s => intToHex(parseInt(s, 10))).join('')}`;
+}
+
 export default {
   name: 'Canvas',
   components: {
@@ -405,6 +412,13 @@ export default {
       }
     },
     convertJSONToShape(shapeType, json) {
+      if (json.config && json.config.color && json.config.color.length > 0) {
+        json.config.color = rgbToHex(json.config.color);
+      }
+      if (json.config && json.config.borderColor && json.config.borderColor.length > 0) {
+        json.config.borderColor = rgbToHex(json.config.borderColor);
+      }
+
       switch (parseInt(shapeType, 10)) {
         case this.tools.text.getShapeType():
           return this.tools.text.convertJSONToShape(json);
