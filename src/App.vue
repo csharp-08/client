@@ -1,12 +1,14 @@
 <template>
   <div id="app">
     <Canvas v-if="connected" :id="id" :connection="connection" :users="users" @exit="exit"></Canvas>
-    <Home @start="start($event)" :id="id" v-else ></Home>
+    <Home @start="start($event)" v-else ></Home>
+    <flash-message class="flash-container" transitionName="fade"></flash-message>
   </div>
 </template>
 
 <script>
 import { HubConnectionBuilder, HubConnectionState } from '@microsoft/signalr';
+import 'vue-flash-message/dist/vue-flash-message.min.css';
 
 import Home from './components/Home.vue';
 import Canvas from './components/Canvas.vue';
@@ -57,6 +59,9 @@ export default {
         localStorage.lobby = lobby;
         this.connected = true;
       } catch (e) {
+        this.flash('Erreur, connexion impossible avec le serveur...', 'error', {
+          timeout: 30 * 1000, // 30 seconds
+        });
         console.log(e);
         this.connected = false;
       }
@@ -96,5 +101,39 @@ body {
   margin: 0;
   padding: 0;
   color: rgb(76, 76, 76);
+}
+.flash-container {
+  position: fixed;
+  top: 60px;
+  left: 10vw;
+  z-index: 100;
+  width: 80vw;
+}
+.fade-enter-active, .fade-leave-active, .fade-move {
+  transition: 500ms cubic-bezier(0.59, 0.12, 0.34, 0.95);
+  transition-property: opacity, transform;
+}
+.fade-leave-active {
+  position: absolute;
+}
+.fade-enter, .fade-leave-to {
+  opacity: 0;
+}
+.fade-leave-to {
+  opacity: 0;
+  transform: scaleY(0);
+  transform-origin: center top;
+}
+.fade-enter-to {
+  opacity: 1;
+}
+.flash__wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.flash__message {
+  display: block;
 }
 </style>
