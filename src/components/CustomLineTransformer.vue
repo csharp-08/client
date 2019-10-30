@@ -65,9 +65,9 @@ export default {
       const { x, y } = this.lineNode.attrs;
       const points = JSON.parse(JSON.stringify(this.lineNode.attrs.points));
       if (x || y) {
-        for (let i=0; i<points.length; i+=2) {
+        for (let i = 0; i < points.length; i += 2) {
           points[i] += x;
-          points[i+1] += y;
+          points[i + 1] += y;
         }
       }
       this.aConfig.x = points[0] - 5;

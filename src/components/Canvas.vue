@@ -126,7 +126,9 @@ export default {
     });
     this.connection.on('updateShape', (shapeType, shape) => {
       if (shapeType === null) {
-        console.log('PERMISSION DENIED');
+        this.flash('Erreur, vous n\'avez pas la permission pour mettre a jour cette forme.', 'error', {
+          timeout: 30 * 1000, // 30 seconds
+        });
       } else {
         const newShape = this.convertJSONToShape(shapeType, shape);
         newShape.owner = shape.owner.connectionId;
@@ -141,7 +143,9 @@ export default {
     });
     this.connection.on('deleteShape', (id) => {
       if (id === null) {
-        console.log('PERMISSION DENIED');
+        this.flash('Erreur, vous n\'avez pas la permission pour supprimer cette forme.', 'error', {
+          timeout: 30 * 1000, // 30 seconds
+        });
         return;
       }
       if (this.selectedNode !== null) {
@@ -151,7 +155,9 @@ export default {
         }
       }
       if (!delete this.shapes[id]) {
-        console.log("Failed to delete shape, it doesn't exist");
+        this.flash('Erreur, cette forme n\'existe pas.', 'error', {
+          timeout: 30 * 1000, // 30 seconds
+        });
         return;
       }
       this.$forceUpdate();
@@ -159,7 +165,9 @@ export default {
     this.connection.on('newShapePermission', (id, permission) => {
       const shape = this.shapes[id] || null;
       if (shape === null) {
-        console.log('Shape not found !');
+        this.flash('Erreur, forme non trouve dans le serveur', 'error', {
+          timeout: 30 * 1000, // 30 seconds
+        });
         return;
       }
       shape.overrideUserPolicy = parseInt(permission, 10);
@@ -216,13 +224,15 @@ export default {
         const newShape = this.temporaryShape[currentIndex] || null;
         const idTempShape = newShape.id;
         if (currentTool.stopDrawing(event, newShape)) {
-          console.log('stop');
           this.isDrawing = false;
           try {
             await this.connection.invoke('AddShape', currentTool.getShapeType().toString(), currentTool.convertShapeToJSON(newShape));
           } catch (err) {
             console.error(err.toString());
             console.log('failed sending');
+            this.flash('Erreur, impossible d\'envoyer la forme au serveur...', 'error', {
+              timeout: 30 * 1000, // 30 seconds
+            });
             this.temporaryShape.some((value, index) => {
               if (value.id === idTempShape) {
                 this.temporaryShape.pop(index);
@@ -233,7 +243,6 @@ export default {
             this.$forceUpdate();
             return;
           }
-          console.log('succeded sending');
           this.temporaryShape.some((value, index) => {
             if (value.id === idTempShape) {
               this.temporaryShape.pop(index);
@@ -243,7 +252,6 @@ export default {
           });
           this.$forceUpdate();
         }
-        
       }
     },
     setTool({ tool, params }) {
@@ -391,6 +399,9 @@ export default {
       } catch (err) {
         console.error(err.toString());
         console.log('failed deleting');
+        this.flash('Erreur, impossible de supprimer la forme...', 'error', {
+          timeout: 30 * 1000, // 30 seconds
+        });
       }
     },
     convertJSONToShape(shapeType, json) {
@@ -418,6 +429,9 @@ export default {
       } catch (err) {
         console.error(err.toString());
         console.log('failed sending');
+        this.flash('Erreur, impossible de mettre a jour la forme...', 'error', {
+          timeout: 30 * 1000, // 30 seconds
+        });
       }
     },
     async updateShapePermission({ id, permission }) {
@@ -426,6 +440,9 @@ export default {
       } catch (err) {
         console.error(err.toString());
         console.log('failed sending');
+        this.flash('Erreur, impossible de mettre a jour les permissions...', 'error', {
+          timeout: 30 * 1000, // 30 seconds
+        });
       }
     },
     async updateUserPermission({ p }) {
@@ -434,6 +451,9 @@ export default {
       } catch (err) {
         console.error(err.toString());
         console.log('failed sending');
+        this.flash('Erreur, impossible de mettre a jour les permissions...', 'error', {
+          timeout: 30 * 1000, // 30 seconds
+        });
       }
     },
   },

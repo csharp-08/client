@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import VueKonva from 'vue-konva';
+import VueFlashMessage from 'vue-flash-message';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import {
   faMousePointer, faPen, faCircle, faPalette, faSquare, faFont, faTimes, faCogs, faDrawPolygon,
@@ -10,6 +11,7 @@ import App from './App.vue';
 
 Vue.config.productionTip = false;
 Vue.use(VueKonva);
+Vue.use(VueFlashMessage);
 Vue.use(ToggleButton);
 
 /* ICONS */
