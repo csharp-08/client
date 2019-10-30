@@ -115,7 +115,7 @@ export default {
     this.configKonva.height = this.$refs.container.clientHeight - 51;
     this.connection.on('newShape', (shapeType, shape) => {
       const newShape = this.convertJSONToShape(shapeType, shape);
-      newShape.owner = shape.owner.connectionId;
+      newShape.owner = shape.owner.sessionId;
       newShape.overrideUserPolicy = shape.overrideUserPolicy || 0b00;
       const owner = this.users[newShape.owner] || { OverridePermissions: 0b00 };
       newShape.config.canEdit = newShape.owner === this.id || ((owner.OverridePermissions & 1) !== (newShape.overrideUserPolicy & 1));
@@ -129,7 +129,7 @@ export default {
         console.log('PERMISSION DENIED');
       } else {
         const newShape = this.convertJSONToShape(shapeType, shape);
-        newShape.owner = shape.owner.connectionId;
+        newShape.owner = shape.owner.sessionId;
         newShape.overrideUserPolicy = shape.overrideUserPolicy || 0b00;
         const owner = this.users[newShape.owner] || { OverridePermissions: 0b00 };
         newShape.config.canEdit = newShape.owner === this.id || ((owner.OverridePermissions & 1) !== (newShape.overrideUserPolicy & 1));
@@ -243,7 +243,6 @@ export default {
           });
           this.$forceUpdate();
         }
-        
       }
     },
     setTool({ tool, params }) {
