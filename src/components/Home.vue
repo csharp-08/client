@@ -26,6 +26,11 @@
 <script>
 export default {
   name: 'Home',
+  beforeCreate() {
+    if (localStorage.id) {
+      this.$emit('start', { username: localStorage.username, lobby: localStorage.lobby });
+    }
+  },
   data() {
     return {
       username: '',
