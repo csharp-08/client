@@ -59,9 +59,9 @@
       <div class="username">{{(users[id] || {}).Username}}</div>
       <div class="colors-container users">({{Object.keys(users).length}} personne(s) dans le salon)
         <div class="colors users">
-          <h4 v-for="uid in others" :key="uid">
-            - {{users[uid].Username}}
-          </h4>
+          <div class="username" style="text-align: center; margin: 0.25rem 0" :style="getColor(index)" v-for="(uid, index) in others" :key="uid">
+            {{users[uid].Username}}
+          </div>
         </div>
       </div>
     </div>
@@ -90,6 +90,20 @@
 </template>
 
 <script>
+const colors = [
+  'rgba(103, 0, 137, 0.55)',
+  'rgba(137, 0, 38, 0.55)',
+  'rgba(66, 137, 0, 0.55)',
+  'rgba(135, 137, 0, 0.55)',
+  'rgba(137, 0, 0, 0.55)',
+  'rgba(0, 80, 137, 0.55)',
+  'rgba(84, 0, 137, 0.55)',
+  'rgba(137, 88, 0, 0.55)',
+  'rgba(0, 137, 99, 0.55)',
+  'rgba(137, 50, 0, 0.55)',
+  'rgba(46, 0, 137, 0.55)',
+];
+
 export default {
   name: 'Toolbox',
   props: {
@@ -139,6 +153,9 @@ export default {
     },
     setTool(tool, params) {
       this.$emit('select-tool', { tool, params: params || {} });
+    },
+    getColor(index) {
+      return { backgroundColor: colors[index] };
     },
     closeTools() {
       this.showColors = false;
@@ -292,10 +309,11 @@ export default {
     right: -0.5rem;
     width: 100%;
     box-shadow: unset;
-    padding: 0 0.5rem;
-    border-right: none;
+    padding: 0.25rem 0.5rem;
     display: none;
     cursor: default;
+    border: none;
+    background-color: transparent;
   }
   .colors-container.users {
     height: 50px;
