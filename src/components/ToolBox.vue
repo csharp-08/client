@@ -26,7 +26,7 @@
       <font-awesome-icon icon="draw-polygon" />
     </button>
     <button class="colors-container has-tooltip"
-            @click.stop="setTool('text'); showText = !showText;"
+            @click.stop="selectText"
             :class="{ active: tool === 'text' }"
             data-tippy-content="Texte">
       <font-awesome-icon icon="font" />
@@ -98,6 +98,20 @@
             <ToggleButton :value="((users[id] || {}).OverridePermissions >> 1) === 1" @change="updatePermission(true)"></ToggleButton>
             <span style="margin-left: 0.4rem">Autoriser la suppression de tout mes objets</span>
           </div>
+          <div>
+            <button class="bg-button" @click.stop="openBg"><span>Changer la couleur de fond</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-container" @click="showBgModal = false" v-if="showBgModal">
+      <div class="grid-item" v-for="card in cards" @click.stop="select(card)" :key="card.color">
+        <div class="grid-cell--top" :style="gradient(card)">
+          <span v-html="card.emoji"></span>
+        </div>
+        <div class="grid-cell--bottom" :style="{ color: card.color }">
+          {{ card.color.toUpperCase() }}
         </div>
       </div>
     </div>
@@ -107,6 +121,10 @@
 <script>
 import tippy from 'tippy.js';
 import 'tippy.js/dist/tippy.css';
+
+function emojify(name) {
+  return `<img class="emoji" src="emojis/${name}.png">`;
+}
 
 const colors = [
   'rgba(103, 0, 137, 0.55)',
@@ -141,6 +159,10 @@ export default {
       type: Object,
       default: () => ({}),
     },
+    value: {
+      type: String,
+      default: '#ffffff',
+    },
   },
   data() {
     return {
@@ -154,6 +176,22 @@ export default {
       ],
       text: '',
       showModal: false,
+      showBgModal: false,
+      activeCard: null,
+      cards: [
+        { emoji: emojify('lion'), color: '#ff691f' },
+        { emoji: emojify('tiger'), color: '#fab81e' },
+        { emoji: emojify('fish'), color: '#7fdbb6' },
+        { emoji: emojify('frog'), color: '#19cf86' },
+        { emoji: emojify('dolphin'), color: '#91d2fa' },
+        { emoji: emojify('whale'), color: '#1b95e0' },
+        { emoji: emojify('elephant'), color: '#abb8c2' },
+        { emoji: emojify('octopus'), color: '#e81c4f' },
+        { emoji: emojify('pig'), color: '#f58ea8' },
+        { emoji: emojify('unicorn'), color: '#981ceb' },
+        { emoji: emojify('rabbit'), color: '#ffffff' },
+        { emoji: emojify('wolf'), color: '#000000' },
+      ],
     };
   },
   computed: {
@@ -193,6 +231,23 @@ export default {
       } else {
         this.$emit('update-permission', { p: u.OverridePermissions ^ 0b01 });
       }
+    },
+    gradient(card) {
+      return {
+        background: `linear-gradient(100deg, whitesmoke -100%, ${card.color})`,
+      };
+    },
+    selectText() {
+      this.setTool('text');
+      this.showText = !this.showText;
+    },
+    select(card) {
+      this.showBgModal = false;
+      this.$emit('input', card.color);
+    },
+    openBg() {
+      this.showModal = false;
+      this.showBgModal = true;
     },
   },
 };
@@ -347,5 +402,56 @@ export default {
   }
   .colors.users > h4 {
     margin: 0.2rem 0;
+  }
+  .grid-container {
+    position: absolute;
+    z-index: 20;
+    top: 0;
+    left: 0;
+    width: calc(100vw - 192px);
+    height: calc(100vh - 192px);
+    background: rgba(0, 0, 0, 0.2);
+    display: grid;
+    grid-template-areas:
+      ". . . ."
+      ". . . ."
+      ". . . .";
+    padding: 96px;
+    grid-gap: 32px;
+    overflow: hidden;
+  }
+  .grid-item {
+    display: grid;
+    grid-template-rows: 65% 35%;
+    background: whitesmoke;
+    border-radius: 4px; box-shadow: rgba(0, 0, 0, 0.25) 0px 10px 60px;
+    transition: transform 500ms;
+    font: 1rem/1.175 "BlinkMacSystemFont", -apple-system, "Roboto", sans-serif;
+  }
+  .grid-item:hover {
+    transition: transform 500ms;
+    transform: scale(1.1);
+    cursor: pointer;
+  }
+  .grid-cell--top, .grid-cell--bottom {
+    display: flex;
+    justify-content: center; align-items: center;
+  }
+  .grid-cell--top    { border-radius: 4px 4px 0 0; }
+  .grid-cell--bottom { font-weight: 900; font-size: 1.75rem; }
+  .bg-button {
+    font-size: 1rem;
+    height: unset;
+    width: unset;
+    margin-top: 1rem;
+    color: #fff;
+    background-color: rgb(191, 203, 217);
+    border-radius: 20px;
+  }
+</style>
+<style>
+  img.emoji {
+    width: 3.5rem; height: 3.5rem;
+    vertical-align: calc(-0.12109375em);
   }
 </style>

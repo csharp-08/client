@@ -7,6 +7,7 @@
               :id="id"
               :users="users"
               @update-permission="updateUserPermission($event)"
+              v-model="backgroundColor"
               ref="toolbox"
     ></tool-box>
     <ShapeParams v-if="selectedNode !== null"
@@ -18,7 +19,8 @@
                  :key="`${selectedNode.attrs.name}_${paramsUpdateFix}`"
                  ref="shapeParams"
     ></ShapeParams>
-    <div class="stage-container" :class="{ showParams: selectedNode !== null}">
+    <div class="stage-container" :class="{ showParams: selectedNode !== null}"
+         :style="{ background: bgColor }">
       <v-stage :config="configKonva"
                @click="selectShape"
                @mousedown="startDrawing($event)"
@@ -52,6 +54,7 @@
         </v-layer>
       </v-stage>
     </div>
+    <Animation :color="backgroundColor"></Animation>
   </div>
 </template>
 
@@ -59,6 +62,7 @@
 import ToolBox from './ToolBox.vue';
 import ShapeParams from './ShapeParams.vue';
 import CustomLineTransformer from './CustomLineTransformer.vue';
+import Animation from './animation.vue';
 
 import FreeLineTool from './tools/freeLineTool';
 import CircleTool from './tools/circle';
@@ -72,6 +76,7 @@ export default {
     ToolBox,
     ShapeParams,
     CustomLineTransformer,
+    Animation,
   },
   props: {
     id: {
@@ -93,6 +98,7 @@ export default {
         width: 0,
         height: 0,
       },
+      backgroundColor: '#ffffff',
       shapes: {},
       temporaryShape: [],
       isDrawing: false,
@@ -109,6 +115,11 @@ export default {
       selectedNode: null,
       paramsUpdateFix: 0,
     };
+  },
+  computed: {
+    bgColor() {
+      return `linear-gradient(100deg, whitesmoke -100%, ${this.backgroundColor})`;
+    },
   },
   mounted() {
     this.configKonva.width = this.$refs.container.clientWidth;
