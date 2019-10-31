@@ -46,7 +46,6 @@ export default {
           const sessionId = localStorage.id;
           url = updateQueryStringParameter(url, 'sessionId', sessionId);
           this.id = sessionId;
-          localStorage.id = sessionId;
         }
         this.connection = new HubConnectionBuilder().withUrl(url).withAutomaticReconnect().build();
         await this.connection.start();

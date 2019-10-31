@@ -26,22 +26,16 @@
 <script>
 export default {
   name: 'Home',
-  watch: {
-    id: {
-      handler() {
-        if (localStorage.id) {
-          this.$emit('start', { username: localStorage.username, lobby: localStorage.lobby });
-        }
-      },
-      immediate: true,
-    },
+  beforeCreate() {
+    if (localStorage.id) {
+      this.$emit('start', { username: localStorage.username, lobby: localStorage.lobby });
+    }
   },
   data() {
     return {
       username: '',
       lobby: 'default',
       invalidInput: false,
-      id: '',
     };
   },
   methods: {
