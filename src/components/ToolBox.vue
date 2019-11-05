@@ -159,7 +159,7 @@ export default {
       type: Object,
       default: () => ({}),
     },
-    value: {
+    bgColor: {
       type: String,
       default: '#ffffff',
     },
@@ -243,7 +243,7 @@ export default {
     },
     select(card) {
       this.showBgModal = false;
-      this.$emit('input', card.color);
+      this.$emit('update-bgcolor', card.color);
     },
     openBg() {
       this.showModal = false;

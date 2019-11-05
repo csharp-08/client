@@ -6,8 +6,9 @@
               :params="toolParams"
               :id="id"
               :users="users"
+              :bg-color="backgroundColor"
               @update-permission="updateUserPermission($event)"
-              v-model="backgroundColor"
+              @update-bgcolor="sendUpdateBackground($event)"
               ref="toolbox"
     ></tool-box>
     <ShapeParams v-if="selectedNode !== null"
@@ -198,6 +199,12 @@ export default {
         shape.config.canDelete = shape.owner === this.id || ((owner.OverridePermissions >> 1) !== (shape.overrideUserPolicy >> 1));
       }
       this.$forceUpdate();
+    });
+    this.connection.on('newBgColor', (color) => {
+      if (color === null) {
+        return;
+      }
+      this.backgroundColor = color;
     });
   },
   methods: {
@@ -463,6 +470,18 @@ export default {
         console.error(err.toString());
         console.log('failed sending');
         this.flash('Erreur, impossible de mettre a jour les permissions...', 'error', {
+          timeout: 30 * 1000, // 30 seconds
+        });
+      }
+    },
+    async sendUpdateBackground(color) {
+      this.backgroundColor = color;
+      try {
+        await this.connection.invoke('UpdateBackgroundColor', this.backgroundColor);
+      } catch (err) {
+        console.error(err.toString());
+        console.log('failed sending');
+        this.flash('Erreur, impossible de mettre a jour la couleur de fond', 'error', {
           timeout: 30 * 1000, // 30 seconds
         });
       }
