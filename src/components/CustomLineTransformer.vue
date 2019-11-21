@@ -3,7 +3,7 @@
     <v-line :config="lineConfig"></v-line>
     <template v-for="(x, index) in lineConfig.points">
       <v-rect :config="{...squareConfig, x: x, y: lineConfig.points[index + 1]}"
-            v-if="(index%2 === 0) && (index !== 0)"
+            v-if="(index%2 === 0) && !(index === 0 && lineConfig.points.length > 4)"
             @dragmove="updatePoint($event, index)"
             @dragend="update"
             @mouseenter="setCursor($event, 'nwse-resize')"
@@ -79,7 +79,7 @@ export default {
       this.lineNode.attrs.points[0 + index] = x - offsetX;
       this.lineNode.attrs.points[1 + index] = y - offsetY;
 
-      if (index === this.lineConfig.points.length - 2) {
+      if (index === this.lineConfig.points.length - 2 && this.lineConfig.points.length > 4) {
         console.log(this.lineConfig.points.length);
         this.updatePoint(event, 0);
       }
