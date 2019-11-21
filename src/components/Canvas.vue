@@ -7,6 +7,7 @@
               :id="id"
               :users="users"
               @update-permission="updateUserPermission($event)"
+              @exit="exit"
               ref="toolbox"
     ></tool-box>
     <ShapeParams v-if="selectedNode !== null"
@@ -122,7 +123,7 @@ export default {
     this.configKonva.height = this.$refs.container.clientHeight - 51;
     this.connection.on('newShape', (shapeType, shape) => {
       const newShape = this.convertJSONToShape(shapeType, shape);
-      newShape.owner = shape.owner.connectionId;
+      newShape.owner = shape.owner.sessionId;
       newShape.overrideUserPolicy = shape.overrideUserPolicy || 0b00;
       const owner = this.users[newShape.owner] || { OverridePermissions: 0b00 };
       newShape.config.canEdit = newShape.owner === this.id || ((owner.OverridePermissions & 1) !== (newShape.overrideUserPolicy & 1));
@@ -138,7 +139,7 @@ export default {
         });
       } else {
         const newShape = this.convertJSONToShape(shapeType, shape);
-        newShape.owner = shape.owner.connectionId;
+        newShape.owner = shape.owner.sessionId;
         newShape.overrideUserPolicy = shape.overrideUserPolicy || 0b00;
         const owner = this.users[newShape.owner] || { OverridePermissions: 0b00 };
         newShape.config.canEdit = newShape.owner === this.id || ((owner.OverridePermissions & 1) !== (newShape.overrideUserPolicy & 1));
@@ -431,8 +432,6 @@ export default {
         case this.tools.polygon.getShapeType():
           return this.tools.polygon.convertJSONToShape(json);
         default:
-          console.log(shapeType);
-          console.log(this.tools.text.getShapeType());
           return 'error';
       }
     },
@@ -469,6 +468,9 @@ export default {
           timeout: 30 * 1000, // 30 seconds
         });
       }
+    },
+    exit() {
+      this.$emit('exit');
     },
   },
 };

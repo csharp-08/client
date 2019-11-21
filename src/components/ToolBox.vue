@@ -1,23 +1,34 @@
 <template>
   <div id="toolbox" @click="closeTools">
-    <button @click="setTool('select')" :class="{ active: tool === 'select' }">
+    <button @click="setTool('select')" :class="{ active: tool === 'select' }"
+            class="has-tooltip"
+            data-tippy-content="Selectionner">
       <font-awesome-icon icon="mouse-pointer" />
     </button>
-    <button @click="setTool('freeLine')" :class="{ active: tool === 'freeLine' }">
+    <button @click="setTool('freeLine')" :class="{ active: tool === 'freeLine' }"
+            class="has-tooltip"
+            data-tippy-content="Dessin">
       <font-awesome-icon icon="pen"/>
     </button>
-    <button @click="setTool('line')" :class="{ active: tool === 'line' }">
+    <button @click="setTool('line')" :class="{ active: tool === 'line' }"
+            class="has-tooltip"
+            data-tippy-content="Ligne">
       <span style="font-size: 3rem; line-height: 2rem;">-</span>
     </button>
-    <button @click="setTool('circle')" :class="{ active: tool === 'circle' }">
+    <button @click="setTool('circle')" :class="{ active: tool === 'circle' }"
+            class="has-tooltip"
+            data-tippy-content="Cercle">
       <font-awesome-icon icon="circle" />
     </button>
-    <button @click="setTool('polygon')" :class="{ active: tool === 'polygon' }">
+    <button @click="setTool('polygon')" :class="{ active: tool === 'polygon' }"
+            class="has-tooltip"
+            data-tippy-content="Polygone">
       <font-awesome-icon icon="draw-polygon" />
     </button>
-    <button class="colors-container"
+    <button class="colors-container has-tooltip"
             @click.stop="setTool('text'); showText = !showText;"
-            :class="{ active: tool === 'text' }">
+            :class="{ active: tool === 'text' }"
+            data-tippy-content="Texte">
       <font-awesome-icon icon="font" />
       <div class="stroke-width" v-if="showText" @click.stop>
         <input id="text"
@@ -50,12 +61,13 @@
       </div>
     </button>
     <div class="divider"></div>
-    <button @click="showModal = true">
+    <button @click="showModal = true"
+            class="has-tooltip"
+            data-tippy-content="Paramètres">
       <font-awesome-icon icon="cogs" />
     </button>
 
     <div class="toRight" :key="Object.keys(users).length">
-      <div class="username">{{(users[id] || {}).Username}}</div>
       <div class="colors-container users">({{Object.keys(users).length}} personne(s) dans le salon)
         <div class="colors users">
           <div class="username" style="text-align: center; margin: 0.25rem 0" :style="getColor(index)" v-for="(uid, index) in others" :key="uid">
@@ -63,12 +75,14 @@
           </div>
         </div>
       </div>
+      <div class="username">{{(users[id] || {}).Username}}</div>
+      <button class="username red" @click="$emit('exit')">Quitter le salon</button>
     </div>
 
     <div class="modal-wrapper" @click="showModal = false" v-if="showModal">
       <div class="modal" @click.stop>
         <div class="modal-header">
-          <h2>Parametres :</h2>
+          <h2>Paramètres :</h2>
           <div class="close-icon" @click="showModal = false">
             <font-awesome-icon icon="times" />
           </div>
@@ -89,6 +103,9 @@
 </template>
 
 <script>
+import tippy from 'tippy.js';
+import 'tippy.js/dist/tippy.css';
+
 import Verte from 'verte';
 import 'verte/dist/verte.css';
 
@@ -147,6 +164,9 @@ export default {
     others() {
       return Object.keys(this.users).filter(key => key !== this.id);
     },
+  },
+  mounted() {
+    tippy('button.has-tooltip');
   },
   methods: {
     updateParam(param) {
@@ -271,7 +291,7 @@ export default {
     border-radius: 2rem;
     border: none;
     padding: 0.6rem 1.2rem;
-    margin: 0 1rem;
+    margin: 0 0.5rem;
     font-weight: bold;
   }
   .modal-wrapper {
@@ -331,6 +351,15 @@ export default {
   }
   .colors.users > h4 {
     margin: 0.2rem 0;
+  }
+  .username.red {
+    background-color: #a62f35;
+    cursor: pointer;
+    font-size: inherit;
+    height: unset;
+  }
+  .username.red:hover {
+    background-color: #7c2328;
   }
 </style>
 <style>

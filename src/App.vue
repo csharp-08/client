@@ -7,9 +7,8 @@
 </template>
 
 <script>
+import { HubConnectionBuilder, HubConnectionState } from '@microsoft/signalr';
 import 'vue-flash-message/dist/vue-flash-message.min.css';
-
-import { HubConnectionBuilder } from '@aspnet/signalr';
 
 import Home from './components/Home.vue';
 import Canvas from './components/Canvas.vue';
@@ -44,21 +43,31 @@ export default {
       try {
         let url = updateQueryStringParameter(`${process.env.VUE_APP_BASE_URL}/ws-server`, 'username', username);
         url = updateQueryStringParameter(url, 'lobby', lobby);
-        this.connection = new HubConnectionBuilder().withUrl(url).build();
+
+        if (localStorage.id) {
+          const sessionId = localStorage.id;
+          url = updateQueryStringParameter(url, 'sessionId', sessionId);
+          this.id = sessionId;
+        }
+        this.connection = new HubConnectionBuilder().withUrl(url).withAutomaticReconnect().build();
         await this.connection.start();
         this.setUpServerAPIs(this.connection);
-        console.log('Connected !');
+        localStorage.username = username;
+        localStorage.lobby = lobby;
+        this.connected = true;
       } catch (e) {
         this.flash('Erreur, connexion impossible avec le serveur...', 'error', {
           timeout: 30 * 1000, // 30 seconds
         });
         console.log(e);
+        this.connected = false;
       }
-      this.connected = true;
     },
     exit() {
       this.username = '';
       this.connected = false;
+      localStorage.clear();
+      this.connection.stop();
     },
     setUpServerAPIs(connection) {
       connection.on('drawers', (users) => {
@@ -66,6 +75,15 @@ export default {
       });
       connection.on('ID', (id) => {
         this.id = id;
+        localStorage.id = id;
+      });
+      connection.onreconnecting((error) => {
+        console.assert(connection.state === HubConnectionState.Reconnecting);
+        console.log(`Connection lost due to error "${error}". Reconnecting.`);
+      });
+      connection.onreconnected((connectionId) => {
+        console.assert(connection.state === HubConnectionState.Reconnecting);
+        console.log(`Reconnected with id: "${connectionId}"`);
       });
     },
   },

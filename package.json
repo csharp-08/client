@@ -13,8 +13,10 @@
     "@fortawesome/fontawesome-svg-core": "^1.2.25",
     "@fortawesome/free-solid-svg-icons": "^5.11.2",
     "@fortawesome/vue-fontawesome": "^0.1.7",
+    "@microsoft/signalr": "^3.0.0",
     "core-js": "^2.6.5",
     "konva": "^4.0.12",
+    "tippy.js": "^5.1.0",
     "verte": "^0.0.12",
     "vue": "^2.6.10",
     "vue-flash-message": "^0.7.2",
@@ -27,7 +29,7 @@
     "@vue/cli-service": "^3.11.0",
     "@vue/eslint-config-airbnb": "^4.0.0",
     "babel-eslint": "^10.0.1",
-    "eslint": "^5.16.0",
+    "eslint": "^6.5.1",
     "eslint-plugin-vue": "^5.0.0",
     "vue-template-compiler": "^2.6.10"
   }
