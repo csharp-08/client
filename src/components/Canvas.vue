@@ -9,6 +9,7 @@
               :bg-color="backgroundColor"
               @update-permission="updateUserPermission($event)"
               @update-bgcolor="sendUpdateBackground($event)"
+              @exit="exit"
               ref="toolbox"
     ></tool-box>
     <ShapeParams v-if="selectedNode !== null"
@@ -435,8 +436,6 @@ export default {
         case this.tools.polygon.getShapeType():
           return this.tools.polygon.convertJSONToShape(json);
         default:
-          console.log(shapeType);
-          console.log(this.tools.text.getShapeType());
           return 'error';
       }
     },
@@ -485,6 +484,9 @@ export default {
           timeout: 30 * 1000, // 30 seconds
         });
       }
+    },
+    exit() {
+      this.$emit('exit');
     },
   },
 };
