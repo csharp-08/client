@@ -66,6 +66,11 @@
             data-tippy-content="Paramètres">
       <font-awesome-icon icon="cogs" />
     </button>
+    <button @click="exportCanvas"
+            class="has-tooltip"
+            data-tippy-content="Exporter le canvas">
+      <font-awesome-icon icon="download" />
+    </button>
 
     <div class="toRight" :key="Object.keys(users).length">
       <div class="colors-container users">({{Object.keys(users).length}} personne(s) dans le salon)
@@ -252,6 +257,9 @@ export default {
     openBg() {
       this.showModal = false;
       this.showBgModal = true;
+    },
+    exportCanvas() {
+      this.$emit('export');
     },
   },
 };

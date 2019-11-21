@@ -3,7 +3,7 @@ import VueKonva from 'vue-konva';
 import VueFlashMessage from 'vue-flash-message';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import {
-  faMousePointer, faPen, faCircle, faPalette, faSquare, faFont, faTimes, faCogs, faDrawPolygon,
+  faMousePointer, faPen, faCircle, faPalette, faSquare, faFont, faTimes, faCogs, faDrawPolygon, faDownload,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import ToggleButton from 'vue-js-toggle-button';
@@ -24,6 +24,7 @@ library.add(faFont);
 library.add(faTimes);
 library.add(faCogs);
 library.add(faDrawPolygon);
+library.add(faDownload);
 Vue.component('font-awesome-icon', FontAwesomeIcon);
 
 new Vue({

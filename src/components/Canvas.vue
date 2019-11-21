@@ -10,6 +10,7 @@
               @update-permission="updateUserPermission($event)"
               @update-bgcolor="sendUpdateBackground($event)"
               @exit="exit"
+              @export="exportImg"
               ref="toolbox"
     ></tool-box>
     <ShapeParams v-if="selectedNode !== null"
@@ -501,6 +502,29 @@ export default {
     },
     exit() {
       this.$emit('exit');
+    },
+    async exportImg() {
+      const { canvas } = this.$refs.layer.getStage();
+      const canvas2 = document.createElement('CANVAS');
+      const ctx2 = canvas2.getContext('2d');
+      const image = new Image();
+      await new Promise((resolve) => {
+        image.addEventListener('load', () => {
+          canvas2.width = image.width;
+          canvas2.height = image.height;
+          ctx2.fillStyle = this.backgroundColor;
+          ctx2.fillRect(0, 0, canvas2.width, canvas2.height);
+          ctx2.drawImage(image, 0, 0, canvas2.width, canvas2.height);
+          resolve();
+        }, false);
+        image.src = canvas.toDataURL('image/png');
+      });
+      const url = canvas2.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'canvas.png');
+      document.body.appendChild(link);
+      link.click();
     },
   },
 };
