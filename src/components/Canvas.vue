@@ -221,6 +221,9 @@ export default {
       if (this.$refs.toolbox) {
         this.$refs.toolbox.closeTools();
       }
+      if (this.isDrawing) {
+        return;
+      }
       if (Object.keys(this.tools).includes(this.tool)) {
         const newShape = this.tools[this.tool].startDrawing(event, this.toolParams);
         if (newShape !== null) {
