@@ -52,8 +52,6 @@ export default {
         this.connection = new HubConnectionBuilder().withUrl(url).withAutomaticReconnect().build();
         await this.connection.start();
         this.setUpServerAPIs(this.connection);
-        console.log('Connected !');
-
         localStorage.username = username;
         localStorage.lobby = lobby;
         this.connected = true;
@@ -68,6 +66,8 @@ export default {
     exit() {
       this.username = '';
       this.connected = false;
+      localStorage.clear();
+      this.connection.stop();
     },
     setUpServerAPIs(connection) {
       connection.on('drawers', (users) => {

@@ -71,7 +71,6 @@
     </button>
 
     <div class="toRight" :key="Object.keys(users).length">
-      <div class="username">{{(users[id] || {}).Username}}</div>
       <div class="colors-container users">({{Object.keys(users).length}} personne(s) dans le salon)
         <div class="colors users">
           <div class="username" style="text-align: center; margin: 0.25rem 0" :style="getColor(index)" v-for="(uid, index) in others" :key="uid">
@@ -79,6 +78,8 @@
           </div>
         </div>
       </div>
+      <div class="username">{{(users[id] || {}).Username}}</div>
+      <button class="username red" @click="$emit('exit')">Quitter le salon</button>
     </div>
 
     <div class="modal-wrapper" @click="showModal = false" v-if="showModal">
@@ -287,7 +288,7 @@ export default {
     border-radius: 2rem;
     border: none;
     padding: 0.6rem 1.2rem;
-    margin: 0 1rem;
+    margin: 0 0.5rem;
     font-weight: bold;
   }
   .modal-wrapper {
@@ -347,5 +348,14 @@ export default {
   }
   .colors.users > h4 {
     margin: 0.2rem 0;
+  }
+  .username.red {
+    background-color: #a62f35;
+    cursor: pointer;
+    font-size: inherit;
+    height: unset;
+  }
+  .username.red:hover {
+    background-color: #7c2328;
   }
 </style>
