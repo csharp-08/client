@@ -10,7 +10,8 @@
               @update-permission="updateUserPermission($event)"
               @update-bgcolor="sendUpdateBackground($event)"
               @exit="exit"
-              @export="exportImg"
+              @exportImg="exportImg"
+              @exportSVG="exportSVG"
               ref="toolbox"
     ></tool-box>
     <ShapeParams v-if="selectedNode !== null"
@@ -214,6 +215,15 @@ export default {
         return;
       }
       this.backgroundColor = color;
+    });
+    this.connection.on('svg', (svgContent) => {
+      const source = `<?xml version="1.0" standalone="no"?>\r\n${svgContent}`;
+      const url = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(source)}`;
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'canvas.svg');
+      document.body.appendChild(link);
+      link.click();
     });
   },
   methods: {
@@ -523,6 +533,9 @@ export default {
       link.setAttribute('download', 'canvas.png');
       document.body.appendChild(link);
       link.click();
+    },
+    async exportSVG() {
+      await this.connection.invoke('GetSVG');
     },
   },
 };

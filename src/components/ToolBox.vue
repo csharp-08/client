@@ -66,7 +66,7 @@
             data-tippy-content="Paramètres">
       <font-awesome-icon icon="cogs" />
     </button>
-    <button @click="exportCanvas"
+    <button @click="showExportModal = true"
             class="has-tooltip"
             data-tippy-content="Exporter le canvas">
       <font-awesome-icon icon="download" />
@@ -103,6 +103,25 @@
           </div>
           <div>
             <button class="bg-button" @click.stop="openBg"><span>Changer la couleur de fond</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-wrapper" @click="showExportModal = false" v-if="showExportModal">
+      <div class="modal" @click.stop>
+        <div class="modal-header">
+          <h2>Export :</h2>
+          <div class="close-icon" @click="showExportModal = false">
+            <font-awesome-icon icon="times" />
+          </div>
+        </div>
+        <div class="content">
+          <div>
+            <button class="bg-button" @click.stop="exportCanvas"><span>Export au format image/png</span></button>
+          </div>
+          <div>
+            <button class="bg-button" @click.stop="exportSVG"><span>Export au format svg</span></button>
           </div>
         </div>
       </div>
@@ -186,6 +205,7 @@ export default {
       text: '',
       showModal: false,
       showBgModal: false,
+      showExportModal: false,
       activeCard: null,
       cards: [
         { emoji: emojify('lion'), color: '#ff691f' },
@@ -259,7 +279,10 @@ export default {
       this.showBgModal = true;
     },
     exportCanvas() {
-      this.$emit('export');
+      this.$emit('exportImg');
+    },
+    exportSVG() {
+      this.$emit('exportSVG');
     },
   },
 };
