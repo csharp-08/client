@@ -221,11 +221,6 @@ export default {
       if (this.$refs.toolbox) {
         this.$refs.toolbox.closeTools();
       }
-      if (this.isDrawing) {
-        // Special case where a drawing needs to clic several times
-        this.stopDrawing(event);
-        return;
-      }
       if (Object.keys(this.tools).includes(this.tool)) {
         const newShape = this.tools[this.tool].startDrawing(event, this.toolParams);
         if (newShape !== null) {

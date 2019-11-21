@@ -66,9 +66,6 @@ class PolygonTool extends Tool {
       newShape.config.points.push(event.evt.offsetY);
       return false;
     }
-
-    newShape.config.points.push(newShape.config.points[0]);
-    newShape.config.points.push(newShape.config.points[1]);
     return true;
   }
 

@@ -48,7 +48,9 @@ class Text extends Tool {
   }
 
   // eslint-disable-next-line
-  stopDrawing(event, newShape) {}
+  stopDrawing(event, newShape) {
+    return true;
+  }
 
   // eslint-disable-next-line
   getKey(shape) {
