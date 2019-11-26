@@ -465,6 +465,7 @@ export default {
     async sendUpdateShape(id) {
       try {
         const currentTool = this.tools[this.shapes[id].toolName];
+        console.log(currentTool.convertShapeToJSON(this.shapes[id], id));
         await this.connection.invoke('UpdateShape', currentTool.getShapeType().toString(), currentTool.convertShapeToJSON(this.shapes[id], id));
       } catch (err) {
         console.error(err.toString());
