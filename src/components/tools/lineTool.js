@@ -47,6 +47,11 @@ class LineTool extends Tool {
     if (!event || !event.evt) {
       return true;
     }
+
+    if (newShape.config.points[0] === event.evt.offsetX
+        && newShape.config.points[1] === event.evt.offsetY) {
+      return false;
+    }
     newShape.config.points[2] = event.evt.offsetX;
     newShape.config.points[3] = event.evt.offsetY;
     return true;

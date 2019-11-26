@@ -60,6 +60,10 @@ class PolygonTool extends Tool {
     if (!event || !event.evt) {
       return true;
     }
+    if (newShape.config.points[0] === event.evt.offsetX
+      && newShape.config.points[1] === event.evt.offsetY) {
+      return false;
+    }
 
     if (this.capturePoint(event, newShape)) {
       newShape.config.points.push(event.evt.offsetX);

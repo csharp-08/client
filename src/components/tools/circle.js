@@ -49,6 +49,11 @@ class Cirle extends Tool {
 
   // eslint-disable-next-line
   stopDrawing(event, newShape) {
+
+    if ((newShape.config.x === event.evt.offsetX)
+      && (newShape.config.y === event.evt.offsetY)) {
+      return false;
+    }
     return true;
   }
 
